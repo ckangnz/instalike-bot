@@ -39,8 +39,8 @@ class InstaBot {
         const delay = (Math.random()+0.3)*this.time.delayLike;
         this.waitFor(delay, ()=>{
             const personName = document.querySelector('a.notranslate:first-child').innerText;
-            const numberOfLikes = document.querySelector('article button[type=button] span') != null
-                ? parseInt(document.querySelector('article button[type=button] span').innerText) 
+            const numberOfLikes = document.querySelector('article section div div:last-child button[type=button] span') != null
+                ? parseInt(document.querySelector('article section div div:last-child button[type=button] span').innerText) 
                 :100;
             console.log(`%c Analyzing ${personName}`,'color:dodgerblue;font-weight:bold;');
             if(numberOfLikes < this.conditions.maxLikes ){
@@ -56,7 +56,7 @@ class InstaBot {
                     if(likebtn){
                         console.log("%cFound matching tags",'font-size:8px; color:lightgray;', hasTag);
                         console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray;');
-                        console.log(`%cLike count:  ${this.actions.likes} images`, "color:tomato; font-style:italic; ");
+                        console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
                         likebtn.click();
                         this.actions.likes++
                     } else {
