@@ -50,7 +50,9 @@ class InstaBot {
                     ? Array.from(document.querySelectorAll('article a[href*="/tags/"]')).filter(function(w){
                         const foundMatch = this.indexOf(w.innerText.replace('#','')) >= 0;
                         return foundMatch;
-                    },this.conditions.include)
+                    },this.conditions.include).map(function(tag){
+                        return tag.innerText.replace('#','');
+                    })
                     :['SKIPPING TAG CHECK'];
                 if(hasTag.length > 0){
                     if(likebtn){
