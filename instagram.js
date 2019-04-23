@@ -96,6 +96,11 @@ class InstaBot {
     waitFor(_s, _c){
         setTimeout(_c, _s);
     }
+    likeAllOnMyFeed(){
+        document.querySelectorAll('button .glyphsSpriteHeart__outline__24__grey_9.u-__7').forEach((item)=>{
+            item.click()
+        })
+    }
 }
 var instabot = new InstaBot();
 instabot.init();
