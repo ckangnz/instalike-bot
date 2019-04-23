@@ -41,7 +41,7 @@ class InstaBot {
         this.waitFor(delay, ()=>{
             const personName = document.querySelector('a.notranslate:first-child').innerText;
             const numberOfLikes = document.querySelector('article section div div:last-child button[type=button] span') != null
-                ? parseInt(document.querySelector('article section div div:last-child button[type=button] span').innerText) 
+                ? parseInt(document.querySelector('article section div div:last-child button[type=button] span').innerText.replace(',','')) 
                 :100;
             console.log(`%c Analyzing ${personName}`,'color:dodgerblue;font-weight:bold;');
             if(numberOfLikes < this.conditions.maxLikes ){
