@@ -38,7 +38,7 @@ class InstaBot {
         console.log(`%c=======================`,'color:white;');
         const delay = (Math.random()+0.3)*this.time.delayLike;
         this.waitFor(delay, ()=>{
-            const personName = document.querySelector('a.notranslate').innerText;
+            const personName = document.querySelector('a.notranslate:first-child').innerText;
             const numberOfLikes = document.querySelector('article button[type=button] span') != null
                 ? parseInt(document.querySelector('article button[type=button] span').innerText) 
                 :100;
@@ -46,10 +46,12 @@ class InstaBot {
             if(numberOfLikes < this.conditions.maxLikes ){
                 const self = this;
                 const likebtn = document.querySelector('article span.glyphsSpriteHeart__outline__24__grey_9.u-__7');
-                const hasTag = Array.from(document.querySelectorAll('article a[href*="/tags/"]')).filter(function(w){
-                    const foundMatch = this.indexOf(w.innerText.replace('#','')) >= 0;
-                    return foundMatch;
-                },this.conditions.include);
+                const hasTag = (this.conditions.include.length > 0)
+                    ? Array.from(document.querySelectorAll('article a[href*="/tags/"]')).filter(function(w){
+                        const foundMatch = this.indexOf(w.innerText.replace('#','')) >= 0;
+                        return foundMatch;
+                    },this.conditions.include)
+                    :['SKIPPING TAG CHECK'];
                 if(hasTag.length > 0){
                     if(likebtn){
                         console.log("%cFound matching tags",'font-size:8px; color:lightgray;', hasTag);
