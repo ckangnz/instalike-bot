@@ -47,6 +47,7 @@ class InstaBot {
             if(numberOfLikes < this.conditions.maxLikes ){
                 const self = this;
                 const likebtn = document.querySelector('article span.glyphsSpriteHeart__outline__24__grey_9.u-__7');
+                const reply = document.querySelectorAll('.EizgU'); reply ? reply.forEach((t)=>t.click()):true;
                 const hasTag = (this.conditions.include.length > 0)
                     ? Array.from(document.querySelectorAll('article a[href*="/tags/"]')).filter(function(w){
                         const foundMatch = this.indexOf(w.innerText.replace('#','')) >= 0;
