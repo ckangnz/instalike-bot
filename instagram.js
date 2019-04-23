@@ -57,7 +57,7 @@ class InstaBot {
                     :['SKIPPING TAG CHECK'];
                 if(( hasTag.length > 0 && this.conditions.includeTags ) || !this.conditions.includeTags){
                     if(likebtn){
-                        console.log("%cFound matching tags",'font-size:8px; color:lightgray;', hasTag.join(','));
+                        console.log(`%cFound matching ${hasTag.length}tags:`,'font-size:8px; color:lightgray;', hasTag.join(','));
                         console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray;');
                         console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
                         likebtn.click();
