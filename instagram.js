@@ -12,6 +12,7 @@ class InstaBot {
         };
         this.conditions = {
             maxLikes : 300,
+            includeTags: true,
             include: [
                 '인스타','인친',
                 "라이크",'좋아요','좋아요환영','좋아요반사','라이크반사','반사','l4l','like','instalike',
@@ -50,13 +51,13 @@ class InstaBot {
                     ? Array.from(document.querySelectorAll('article a[href*="/tags/"]')).filter(function(w){
                         const foundMatch = this.indexOf(w.innerText.replace('#','')) >= 0;
                         return foundMatch;
-                    },this.conditions.include).map(function(tag){
+                    },this.conditions.include).map((tag)=>{
                         return tag.innerText.replace('#','');
                     })
                     :['SKIPPING TAG CHECK'];
-                if(hasTag.length > 0){
+                if(( hasTag.length > 0 && this.conditions.includeTags ) || !this.conditions.includeTags){
                     if(likebtn){
-                        console.log("%cFound matching tags",'font-size:8px; color:lightgray;', hasTag);
+                        console.log("%cFound matching tags",'font-size:8px; color:lightgray;', hasTag.join(','));
                         console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray;');
                         console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
                         likebtn.click();
@@ -100,6 +101,10 @@ class InstaBot {
         document.querySelectorAll('button .glyphsSpriteHeart__outline__24__grey_9.u-__7').forEach((item)=>{
             item.click()
         })
+    }
+    toggleIncludeTag(){
+        this.conditions.includeTags = !this.conditions.includeTags;
+        console.warn(`Including Tags : ${this.conditions.includeTags}`)
     }
 }
 var instabot = new InstaBot();
