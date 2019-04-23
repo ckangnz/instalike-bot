@@ -109,4 +109,3 @@ class InstaBot {
     }
 }
 var instabot = new InstaBot();
-instabot.init();

@@ -11,16 +11,19 @@
 5. Open console on chrome
   - Windows : `Ctrl` + `Alt` + `i`
   - Mac : `Cmd` + `option` + `i`
-6. Under Console, paste the script and hit `enter`
+6. Under Console, paste the script then `enter`
+7. Type `instabot.init()` (from Top Post) or `instabot.init(false)` (from Most Recent)
 
 ---
 
-By Default, the script will include Top Posts. If you wish to start from Most Recent, change `instabot.init()` to `instabot.init(false)`
+### Tips
+
+* If you wish to turn off checking tags, type `instabot.toggleIncludeTag()`
+* On your feed, run `instabot.likeAllOnMyFeed()` to like everyone's posts :D
 
 ### Customize these in the scripts :
 ```js
 this.time.maxDuration           // How long you wish to run bot for
 this.conditions.maxLikes        // Skip those who have too many likes
 this.include                    // Like those who has these tags
-
 ```
