@@ -70,9 +70,9 @@ class InstaBot {
                             console.log(`%cFound matching ${hasTag.length}tags:`,'font-size:8px; color:lightgray;', hasTag.join(','));
                             console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray;');
                         }
-                        console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
                         likebtn.click();
                         this.actions.likes++
+                        console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
                     } else {
                         console.log(`%cAlready liked.`,'font-size:8px; color:red;');
                     }
