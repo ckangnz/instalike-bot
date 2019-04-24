@@ -18,7 +18,7 @@
 
 ### Tips
 
-* If you wish to turn off checking tags, type `instabot.toggleIncludeTag()`
+* To check your status, type `instabot.check()`
 * If you wish to force like all posts, type `instabot.toggleForce()`
 * On your feed, run `instabot.likeAllOnMyFeed()` to like everyone's posts :D
 

@@ -23,6 +23,12 @@ class InstaBot {
             likes: 0, // Counter used for console logging
         };
     }
+    check(){
+        console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,'font-size:15px;')
+        console.log(`%cForce Like? : ${this.conditions.forceLike}`,'font-size:15px;')
+        console.log(`%cMax Likes? : ${this.conditions.maxLikes}`,'font-size:15px;')
+        console.log(`%cTags required? : ${this.conditions.include.join(',')}`,'font-size:15px;')
+    }
     init(includeTop = true){
         this.time.start = performance.now();
         if(includeTop){
