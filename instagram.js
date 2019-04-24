@@ -53,9 +53,18 @@ class InstaBot {
     }
     getName(){
         return document.querySelector(this.element.name) != null
-            ? document.querySelector(this.element.name).innerText
-            : console.log(`%cCouldn't load name. Retrying...`,'font-size:8px; color:red;') 
-            && setTimeout(()=>document.querySelector(this.element.name) != null ? document.querySelector(this.element.name).innerText : null,delay);
+            ? {
+                personName : document.querySelector(this.element.name).innerText,
+                personLink : document.querySelector(this.element.name).href,
+            }
+            : console.log(`%cCouldn't load name. Retrying...`,'font-size:8px; color:red!important;') 
+            && setTimeout(()=>document.querySelector(this.element.name) != null 
+                ? {
+                    personName : document.querySelector(this.element.name).innerText,
+                    personLink : document.querySelector(this.element.name).href,
+                }
+                : null
+                ,delay);
     }
     getNumberOfLikes(){
         return document.querySelector(this.element.numberOfLikes) != null
@@ -66,9 +75,10 @@ class InstaBot {
         console.log(`%c=======================`,'color:white;');
         const delay = (Math.random()+0.3)*this.time.delayLike;
         this.waitFor(delay, ()=>{
-            const personName = this.getName();
+            const { personName, personLink } = this.getName() || {};
             const numberOfLikes = this.getNumberOfLikes();
-            console.log(`%c Analyzing %c${personName}`,'color:dodgerblue;font-weight:bold;','color:black; text-decoration:underline;');
+            console.log(`%c Analyzing %c${personName}`,'color:dodgerblue;font-weight:bold;','background:yellow; text-decoration:underline;');
+            console.log(`%c${personLink}`,'font-size:8px;');
             if( personName != null && 
                 ((numberOfLikes < this.conditions.maxLikes && !this.conditions.forceLike) || this.conditions.forceLike) 
             ){
@@ -86,27 +96,27 @@ class InstaBot {
                 if(( hasTag.length > 0 && !this.conditions.forceLike ) || this.conditions.forceLike){
                     if(likebtn){
                         if(this.conditions.forceLike){
-                            console.log(`%cForce liking:`,'font-size:8px; color:lightgray;');
+                            console.log(`%cForce liking:`,'font-size:8px; color:lightgray!important;');
                         } else {
-                            console.log(`%cFound matching ${hasTag.length}tags:`,'font-size:8px; color:lightgray;', hasTag.join(','));
-                            console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray;');
+                            console.log(`%cFound matching ${hasTag.length} tags:`,'font-size:8px; color:lightgray!important;', hasTag.join(','));
+                            console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray!important;');
                         }
                         likebtn.click();
                         this.actions.likes++
                         console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
                     } else {
-                        console.log(`%cAlready liked.`,'font-size:8px; color:red;');
+                        console.log(`%cAlready liked.`,'font-size:8px; color:red!important;');
                     }
                     this.goToNextImage();
                 } else {
-                    console.log(`%cNo Matching tags.`,'font-size:8px; color:red;');
+                    console.log(`%cNo Matching tags.`,'font-size:8px; color:red!important;');
                     this.goToNextImage();
                 }
             } else {
                 if(personName == null) {
-                    console.log(`%c Couldn't load the person`, 'font-size:8px; color:red;');
+                    console.log(`%c Couldn't load the person`, 'font-size:8px; color:red!important;');
                 } else {
-                    console.log(`%c Too many likes`, 'font-size:8px; color:red;');
+                    console.log(`%c Too many likes`, 'font-size:8px; color:red!important;');
                 }
                 this.goToNextImage();
             }
@@ -120,13 +130,13 @@ class InstaBot {
 
             el ? el.click() : true;
             if(performance.now() - this.time.start < this.time.maxDuration && !this.actions.stopped){
-                console.log(`%cRun time:  ${Math.round((performance.now() - this.time.start)/this.min*10)/10} minutes`,'color:gray;font-size:8px;font-style:italic');
+                console.log(`%cTime remaining: ${ Math.round((this.time.maxDuration - (performance.now() - this.time.start))/this.min*10)/10} minutes`,'color:gray;font-size:6px;font-style:italic');
                 this.likeImage();
             }
             else{
                 console.log(`%c=======================`,'color:white;');
-                console.log("%cAll done here...",'font-weight:bold; font-size:18px;color:green;');
-                console.log(`%cTotal Like count: ${this.actions.likes} images`, "font-weight:bold; font-size:15px;");
+                console.log("%cAll done here...",'font-weight:bold; font-size:14px;color:green;');
+                console.log(`%cTotal Like count: ${this.actions.likes} images`, "font-weight:bold; font-size:12px;");
             }
         });
     }
@@ -140,7 +150,9 @@ class InstaBot {
     }
     toggleForce(){
         this.conditions.forceLike = !this.conditions.forceLike;
-        console.warn(`Force like all posts? : ${this.conditions.forceLike}`)
+        console.log(`%cForce like all posts? : %c${this.conditions.forceLike}`,
+            'background:red;color:white!important;',
+            'background:white;color:black!important;')
     }
     waitFor(_s, _c){
         setTimeout(_c, _s);
