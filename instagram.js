@@ -8,11 +8,11 @@ class InstaBot {
             delayInitial: 2 * this.s,
             delayLike: 4 * this.s, // Delay from the image is shown to the image is liked
             delayNext: 3 * this.s, // Delay from the image is liked to the next image is loaded
-            maxDuration: 2 * this.min, // Max runtime before the script stops liking
+            maxDuration: 10 * this.min, // Max runtime before the script stops liking
         };
         this.conditions = {
             maxLikes : 300,
-            includeTags: true,
+            forceLike: false,
             include: [
                 '인스타','인친',
                 "라이크",'좋아요','좋아요환영','좋아요반사','라이크반사','반사','l4l','like','instalike',
@@ -44,7 +44,7 @@ class InstaBot {
                 ? parseInt(document.querySelector('article section div div:last-child button[type=button] span').innerText.replace(',','')) 
                 :100;
             console.log(`%c Analyzing ${personName}`,'color:dodgerblue;font-weight:bold;');
-            if(numberOfLikes < this.conditions.maxLikes ){
+            if((numberOfLikes < this.conditions.maxLikes && !this.conditions.forceLike) || this.conditions.forceLike ){
                 const self = this;
                 const likebtn = document.querySelector('article span.glyphsSpriteHeart__outline__24__grey_9.u-__7');
                 const reply = document.querySelectorAll('.EizgU'); reply ? reply.forEach((t)=>t.click()):true;
@@ -56,10 +56,14 @@ class InstaBot {
                         return tag.innerText.replace('#','');
                     })
                     :['SKIPPING TAG CHECK'];
-                if(( hasTag.length > 0 && this.conditions.includeTags ) || !this.conditions.includeTags){
+                if(( hasTag.length > 0 && !this.conditions.forceLike ) || this.conditions.forceLike){
                     if(likebtn){
-                        console.log(`%cFound matching ${hasTag.length}tags:`,'font-size:8px; color:lightgray;', hasTag.join(','));
-                        console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray;');
+                        if(this.conditions.forceLike){
+                            console.log(`%cForce liking:`,'font-size:8px; color:lightgray;', hasTag.join(','));
+                        } else {
+                            console.log(`%cFound matching ${hasTag.length}tags:`,'font-size:8px; color:lightgray;', hasTag.join(','));
+                            console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray;');
+                        }
                         console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
                         likebtn.click();
                         this.actions.likes++
@@ -103,9 +107,9 @@ class InstaBot {
             item.click()
         })
     }
-    toggleIncludeTag(){
-        this.conditions.includeTags = !this.conditions.includeTags;
-        console.warn(`Including Tags : ${this.conditions.includeTags}`)
+    toggleForce(){
+        this.conditions.forceLike = !this.conditions.forceLike;
+        console.warn(`Force like all posts? : ${this.conditions.forceLike}`)
     }
 }
 var instabot = new InstaBot();

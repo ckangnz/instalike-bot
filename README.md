@@ -19,6 +19,7 @@
 ### Tips
 
 * If you wish to turn off checking tags, type `instabot.toggleIncludeTag()`
+* If you wish to force like all posts, type `instabot.toggleForce()`
 * On your feed, run `instabot.likeAllOnMyFeed()` to like everyone's posts :D
 
 ### Customize these in the scripts :
