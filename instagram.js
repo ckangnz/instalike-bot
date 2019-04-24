@@ -65,7 +65,7 @@ class InstaBot {
                 if(( hasTag.length > 0 && !this.conditions.forceLike ) || this.conditions.forceLike){
                     if(likebtn){
                         if(this.conditions.forceLike){
-                            console.log(`%cForce liking:`,'font-size:8px; color:lightgray;', hasTag.join(','));
+                            console.log(`%cForce liking:`,'font-size:8px; color:lightgray;');
                         } else {
                             console.log(`%cFound matching ${hasTag.length}tags:`,'font-size:8px; color:lightgray;', hasTag.join(','));
                             console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray;');
