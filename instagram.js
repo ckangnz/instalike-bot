@@ -21,7 +21,16 @@ class InstaBot {
         }
         this.actions = {
             likes: 0, // Counter used for console logging
+            stopped: false,
         };
+        this.element = {
+            name : 'a.notranslate:first-child',
+            numberOfLikes : 'article section div div:last-child button[type=button] span',
+            likeBtn:'article span.glyphsSpriteHeart__outline__24__grey_9.u-__7',
+            reply: 'span.EizgU',
+            tags : 'article a[href*="/tags/"]',
+            nextBtn: 'a.coreSpriteRightPaginationArrow',
+        }
     }
     check(){
         console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,'font-size:15px;')
@@ -31,6 +40,7 @@ class InstaBot {
     }
     init(includeTop = true){
         this.time.start = performance.now();
+        this.actions.stopped = false;
         if(includeTop){
             document.querySelector('a[href*="/p/"]').click(); // Click first image from Recent
         } else {
@@ -41,21 +51,32 @@ class InstaBot {
             this.likeImage(); // Initial like to start off the chain reaction
         })
     }
+    getName(){
+        return document.querySelector(this.element.name) != null
+            ? document.querySelector(this.element.name).innerText
+            : console.log(`%cCouldn't load name. Retrying...`,'font-size:8px; color:red;') 
+            && setTimeout(()=>document.querySelector(this.element.name) != null ? document.querySelector(this.element.name).innerText : null,delay);
+    }
+    getNumberOfLikes(){
+        return document.querySelector(this.element.numberOfLikes) != null
+            ? parseInt(document.querySelector(this.element.numberOfLikes).innerText.replace(',','')) 
+            :100;
+    }
     likeImage(){
         console.log(`%c=======================`,'color:white;');
         const delay = (Math.random()+0.3)*this.time.delayLike;
         this.waitFor(delay, ()=>{
-            const personName = document.querySelector('a.notranslate:first-child').innerText;
-            const numberOfLikes = document.querySelector('article section div div:last-child button[type=button] span') != null
-                ? parseInt(document.querySelector('article section div div:last-child button[type=button] span').innerText.replace(',','')) 
-                :100;
-            console.log(`%c Analyzing ${personName}`,'color:dodgerblue;font-weight:bold;');
-            if((numberOfLikes < this.conditions.maxLikes && !this.conditions.forceLike) || this.conditions.forceLike ){
+            const personName = this.getName();
+            const numberOfLikes = this.getNumberOfLikes();
+            console.log(`%c Analyzing %c${personName}`,'color:dodgerblue;font-weight:bold;','color:black; text-decoration:underline;');
+            if( personName != null && 
+                ((numberOfLikes < this.conditions.maxLikes && !this.conditions.forceLike) || this.conditions.forceLike) 
+            ){
                 const self = this;
-                const likebtn = document.querySelector('article span.glyphsSpriteHeart__outline__24__grey_9.u-__7');
-                const reply = document.querySelectorAll('.EizgU'); reply ? reply.forEach((t)=>t.click()):true;
+                const likebtn = document.querySelector(this.element.likeBtn);
+                const reply = document.querySelectorAll(this.element.reply); reply ? reply.forEach((t)=>t.click()):true;
                 const hasTag = (this.conditions.include.length > 0)
-                    ? Array.from(document.querySelectorAll('article a[href*="/tags/"]')).filter(function(w){
+                    ? Array.from(document.querySelectorAll(this.element.tags)).filter(function(w){
                         const foundMatch = this.indexOf(w.innerText.replace('#','')) >= 0;
                         return foundMatch;
                     },this.conditions.include).map((tag)=>{
@@ -82,7 +103,11 @@ class InstaBot {
                     this.goToNextImage();
                 }
             } else {
-                console.log(`%c Too many likes`, 'font-size:8px; color:red;');
+                if(personName == null) {
+                    console.log(`%c Couldn't load the person`, 'font-size:8px; color:red;');
+                } else {
+                    console.log(`%c Too many likes`, 'font-size:8px; color:red;');
+                }
                 this.goToNextImage();
             }
         });
@@ -91,10 +116,10 @@ class InstaBot {
         const delay = (Math.random()+0.4)* this.time.delayNext;
         this.waitFor(delay, ()=>{
             // Go to next image
-            const el = document.querySelector('a.coreSpriteRightPaginationArrow');
+            const el = document.querySelector(this.element.nextBtn);
 
             el ? el.click() : true;
-            if(performance.now() - this.time.start < this.time.maxDuration){
+            if(performance.now() - this.time.start < this.time.maxDuration && !this.actions.stopped){
                 console.log(`%cRun time:  ${Math.round((performance.now() - this.time.start)/this.min*10)/10} minutes`,'color:gray;font-size:8px;font-style:italic');
                 this.likeImage();
             }
@@ -105,17 +130,20 @@ class InstaBot {
             }
         });
     }
-    waitFor(_s, _c){
-        setTimeout(_c, _s);
+    stop(){
+        this.actions.stopped = true;
     }
     likeAllOnMyFeed(){
-        document.querySelectorAll('button .glyphsSpriteHeart__outline__24__grey_9.u-__7').forEach((item)=>{
-            item.click()
+        document.querySelectorAll(this.element.likeBtn).forEach((b)=>{
+            b.click()
         })
     }
     toggleForce(){
         this.conditions.forceLike = !this.conditions.forceLike;
         console.warn(`Force like all posts? : ${this.conditions.forceLike}`)
     }
+    waitFor(_s, _c){
+        setTimeout(_c, _s);
+    }
 }
-var instabot = new InstaBot();
+const instabot = new InstaBot();

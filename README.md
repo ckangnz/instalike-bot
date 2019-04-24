@@ -13,6 +13,7 @@
   - Mac : `Cmd` + `option` + `i`
 6. Under Console, paste the script then `enter`
 7. Type `instabot.init()` (from Top Post) or `instabot.init(false)` (from Most Recent)
+8. Type `instabot.stop()` to stop.
 
 ---
 
