@@ -1,19 +1,27 @@
-# This bot will automatically like instagram posts
+# Instagram Browser Bot
 
 ##### *This bot requires Chrome*
 
+This bot will automatically like instagram posts depending on these conditions:
+  * posts includes specified tags
+  * posts doesn't include specified tags
+  * posts that has less likes than specified number
+
+To Do: I'm going to build this bot to be a chrome's extension tool so you get an UI to change options.
+
 ---
 ### Instruction
-1. Copy this script to your favourite IDE (sublime, notepad, vim etc.)
-2. Customize it to your need (I don't recommend changing delay times)
-3. Copy the script
-4. Visit www.instagram.com/explore/tags/(whatever tag you want)
-5. Open console on chrome
-  - Windows : `Ctrl` + `Alt` + `i`
-  - Mac : `Cmd` + `option` + `i`
-6. Under Console, paste the script then `enter`
-7. Type `instabot.init()` (from Top Post) or `instabot.init(false)` (from Most Recent)
-8. Type `instabot.stop()` to stop.
+
+  1. Copy this script to your favourite IDE (sublime, notepad, vim etc.)
+  2. Customize it to your need (I don't recommend changing delay times)
+  3. Copy the script
+  4. Visit www.instagram.com/explore/tags/(whatever tag you want)
+  5. Open console on chrome
+    - Windows : `Ctrl` + `Alt` + `i`
+    - Mac : `Cmd` + `option` + `i`
+  6. Under Console, paste the script then `enter`
+  7. Type `instabot.init()` (from Top Post) or `instabot.init(false)` (from Most Recent)
+  8. Type `instabot.stop()` to stop.
 
 ---
 
