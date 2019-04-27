@@ -201,7 +201,7 @@ class InstaBot {
                     const loadedHeight = document.querySelector(this.element.followersInnerHeight).scrollHeight
                     const isLoading = (document.querySelector(this.element.suggestionsTitle))
                     ? scroll.scrollTop != loadedHeight
-                    : scroll.scrollTop + scroll.offsetHeight != loadedHeight 
+                    : (document.querySelector('.W1Bne.ztp9m'))?true:scroll.scrollTop + scroll.offsetHeight != loadedHeight 
                     if(isLoading){
                         scroll.scrollTop = loadedHeight;
                     } else {
@@ -215,7 +215,7 @@ class InstaBot {
                             resolve(list)
                         })
                     }
-                }, 800)
+                }, 1000)
             })
         })
     }
