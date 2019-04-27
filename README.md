@@ -22,6 +22,7 @@
 * To check your status, type `instabot.check()`
 * If you wish to force like all posts, type `instabot.toggleFilter()`
 * On your feed, run `instabot.likeAllOnMyFeed()` to like everyone's posts :D
+* On a profile page, run `instabot.showWhoUnfollowedMe()`. Wait, and you will see the list of people who are not following you back!
 
 ### Customize these in the scripts :
 ```js

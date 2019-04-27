@@ -33,6 +33,12 @@ class InstaBot {
             reply: 'span.EizgU',
             tags : 'article a[href*="/tags/"]',
             nextBtn: 'a.coreSpriteRightPaginationArrow',
+            followersBtn : 'a.-nal3, a._81NM2',
+            followersOverHidden : '.isgrP',
+            followersInnerHeight : 'ul.jSC57._6xe7A',
+            followersList: 'a.FPmhX.notranslate._0imsa',
+            followerPopupCloseBtn:'span[aria-label="Close"]',
+            suggestionsTitle: 'h4._7UhW9',
         }
     }
     check(){
@@ -157,6 +163,61 @@ class InstaBot {
                 console.log(`%cTotal Like count: ${this.actions.likes} images`, "font-weight:bold; font-size:12px;");
             }
         });
+    }
+    async showWhoUnfollowedMe(){
+        const following = await this.loadFollowings();
+        const followers = await this.loadFollowers();
+        const unfollowers = following.filter(function(f){
+            return this.indexOf(f) == -1;
+        },followers)
+        console.log(`You have ${unfollowers.length} people who are not following back:`)
+        unfollowers.forEach((f)=>{
+            console.log(`%c ${f} :  https://www.instagram.com/${f}`,'font-size:8px;color:grey;')
+        })
+    }
+    async loadFollowings(){
+        console.log("Loading user's following list.. Please wait.." );
+        return new Promise(async resolve => {
+            const flBtn = document.querySelectorAll(this.element.followersBtn);
+            flBtn[flBtn.length-1].click();
+            const result = await this.fetchPeople();
+            resolve(result);
+        })
+    }
+    async loadFollowers(){
+        console.log("Loading user's followers... Please wait...");
+        return new Promise(async resolve => {
+            const flBtn = document.querySelectorAll(this.element.followersBtn);
+            flBtn[0].click();
+            const result = await this.fetchPeople();
+            resolve(result);
+        })
+    }
+    fetchPeople(){
+        return new Promise(resolve => {
+            this.waitFor(1500,()=>{
+                const itvl = setInterval(()=>{
+                    const scroll = document.querySelector(this.element.followersOverHidden);
+                    const loadedHeight = document.querySelector(this.element.followersInnerHeight).scrollHeight
+                    const isLoading = (document.querySelector(this.element.suggestionsTitle))
+                    ? scroll.scrollTop != loadedHeight
+                    : scroll.scrollTop + scroll.offsetHeight != loadedHeight 
+                    if(isLoading){
+                        scroll.scrollTop = loadedHeight;
+                    } else {
+                        clearInterval(itvl);
+                        const list = Array.from(document.querySelectorAll(this.element.followersList)).map((p)=>{
+                            return p.innerText
+                        })
+                        document.querySelector(this.element.followerPopupCloseBtn).click()
+                        console.log(`%cFinished collecting`,'font-size:8px;color:grey;');
+                        this.waitFor(1000,()=>{
+                            resolve(list)
+                        })
+                    }
+                }, 800)
+            })
+        })
     }
     stop(){
         this.actions.stopped = true;
