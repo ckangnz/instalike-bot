@@ -17,6 +17,9 @@ class InstaBot {
                 '인스타','인친',
                 "라이크",'좋아요','좋아요환영','좋아요반사','라이크반사','반사','l4l','like','instalike',
                 'follow','followme','맞팔','팔로우','맞팔해요','파로윙',
+            ] || [],
+            exclude: [
+                '10k','20k','30k','10kfollowers','20kfollowers'
             ]
         }
         this.actions = {
@@ -85,15 +88,26 @@ class InstaBot {
                 const self = this;
                 const likebtn = document.querySelector(this.element.likeBtn);
                 const reply = document.querySelectorAll(this.element.reply); reply ? reply.forEach((t)=>t.click()):true;
-                const hasTag = (this.conditions.include.length > 0)
-                    ? Array.from(document.querySelectorAll(this.element.tags)).filter(function(w){
-                        const foundMatch = this.indexOf(w.innerText.replace('#','')) >= 0;
-                        return foundMatch;
-                    },this.conditions.include).map((tag)=>{
+                const hasTag = (this.conditions.include.length > 0 )
+                    ? Array.from(document.querySelectorAll(this.element.tags))
+                    .filter(function(w){
+                        return this.indexOf(w.innerText.replace('#','')) >= 0;
+                    },this.conditions.include)
+                    .map((tag)=>{
                         return tag.innerText.replace('#','');
                     })
                     :['SKIPPING TAG CHECK'];
-                if(( hasTag.length > 0 && this.conditions.isFiltering ) || !this.conditions.isFiltering){
+                const hasExcludes = (this.conditions.exclude.length > 0)
+                    ? Array.from(document.querySelectorAll(this.element.tags))
+                    .filter(function(w){
+                        return this.indexOf(w.innerText.replace('#','')) >= 0;
+                    },this.conditions.exclude)
+                    .map((tag)=>{
+                        return tag.innerText.replace('#','');
+                    })
+                    :['SKIPPING EXCLUDE CHECK'];
+
+                if(( hasTag.length > 0 && hasExcludes == 0 && this.conditions.isFiltering ) || !this.conditions.isFiltering){
                     if(likebtn){
                         if(!this.conditions.isFiltering){
                             console.log(`%c Not Filtering:`,'font-size:8px; color:lightgray!important;');
@@ -109,7 +123,11 @@ class InstaBot {
                     }
                     this.goToNextImage();
                 } else {
-                    console.log(`%cNo Matching tags.`,'font-size:8px; color:red!important;');
+                    if(hasExcludes.length > 0){
+                        console.log(`%cFound unwanted tags:`,'font-size:8px; color:lightgray!important;', hasExcludes.join(','));
+                    } else {
+                        console.log(`%cNo Matching tags.`,'font-size:8px; color:red!important;');
+                    }
                     this.goToNextImage();
                 }
             } else {
