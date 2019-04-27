@@ -20,7 +20,7 @@
 ### Tips
 
 * To check your status, type `instabot.check()`
-* If you wish to force like all posts, type `instabot.toggleForce()`
+* If you wish to force like all posts, type `instabot.toggleFilter()`
 * On your feed, run `instabot.likeAllOnMyFeed()` to like everyone's posts :D
 
 ### Customize these in the scripts :
