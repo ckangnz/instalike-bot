@@ -12,6 +12,7 @@ class InstaBot {
             maxDuration: 10 * this.min, // Max runtime before the script stops liking
         };
         this.conditions = {
+            maxFollows: 15,
             maxLiked: 80,
             minLikes: 20,
             maxLikes : 300,
@@ -80,6 +81,10 @@ class InstaBot {
         if(this.actions.likes > 0){
             console.log(`Resetting likes from ${this.actions.likes} to 0`)
             this.actions.likes = 0;
+        }
+        if(this.actions.follows.length > 0){
+            console.log(`Resetting likes from ${this.actions.likes} to 0`)
+            this.actions.follows = [];
         }
         const post = (includeTop)?document.querySelector(this.element.post):document.querySelector(this.element.recentPost)
         post.click(); // Click first image from Top Posts
@@ -292,12 +297,17 @@ class InstaBot {
     follow(hasF4F){
         if(hasF4F && this.conditions.isFiltering){
             const likes = this.getNumberOfLikes();
-            if(likes >= this.conditions.minLikes  && likes <= this.conditions.maxLikes){
+            if(
+                likes >= this.conditions.minLikes && likes <= this.conditions.maxLikes 
+                && this.actions.follows.length < this.conditions.maxFollows
+            ){
                 const person = this.getName();
                 const followBtn = document.querySelector(this.element.followBtn)
                 followBtn.click();
                 this.actions.follows.push(person);
                 console.log('%c THIS PERSON HAS BEEN FOLLOWED', 'font-size:8px;font-weight:bold;');
+            } else if(this.actions.follows.length >= this.conditions.maxFollows){
+                console.log('%c FOLLOW LIMIT EXCEEDED', 'font-size:8px;font-weight:bold;');
             }
         }
     }
