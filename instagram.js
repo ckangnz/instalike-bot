@@ -34,6 +34,7 @@ class InstaBot {
             numberOfLikes : 'article section div div:last-child button[type=button] span',
             likeBtn:'article span.glyphsSpriteHeart__outline__24__grey_9.u-__7',
             reply: 'span.EizgU',
+            extraReply: 'span.glyphsSpriteCircle_add__outline__24__grey_9.u-__7',
             tags : 'article a[href*="/tags/"]',
             nextBtn: 'a.coreSpriteRightPaginationArrow',
             followersBtn : 'a.-nal3, a._81NM2',
@@ -100,6 +101,7 @@ class InstaBot {
             ){
                 const self = this;
                 const likebtn = document.querySelector(this.element.likeBtn);
+                const extraReply = document.querySelectorAll(this.element.extraReply); extraReply? extraReply.forEach((t)=>t.click()):true;
                 const reply = document.querySelectorAll(this.element.reply); reply ? reply.forEach((t)=>t.click()):true;
                 const hasTag = (this.conditions.include.length > 0 )
                     ? Array.from(document.querySelectorAll(this.element.tags))
