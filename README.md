@@ -37,4 +37,5 @@ To Do: I'm going to build this bot to be a chrome's extension tool so you get an
 this.time.maxDuration           // How long you wish to run bot for
 this.conditions.maxLikes        // Skip those who have too many likes
 this.include                    // Like those who has these tags
+this.exclude                    // Like those who doesn't have these tags
 ```

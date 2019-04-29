@@ -49,7 +49,8 @@ class InstaBot {
         console.log(`%Filtering? : ${this.conditions.isFiltering}`,'font-size:15px;')
         console.log(`%cMax like ? : ${this.conditions.maxLiked}`,'font-size:15px;')
         console.log(`%cLikes less than ? : ${this.conditions.maxLikes} likes`,'font-size:15px;')
-        console.log(`%cTags required? : ${this.conditions.include.join(',')}`,'font-size:15px;')
+        console.log(`%cIncluded Tags? : ${this.conditions.include.join(',')}`,'font-size:15px;')
+        console.log(`%cExcluded Tags? : ${this.conditions.exclude.join(',')}`,'font-size:15px;')
     }
     init(includeTop = true){
         this.actions.stopped = false;
