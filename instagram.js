@@ -76,10 +76,9 @@ class InstaBot {
         this.createUI();
     }
     status(){
+        console.log(`%cSettings`,'font-size:10px;font-weight:bold;')
         console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,'font-size:8px;')
         console.log(`%cFiltering? : ${this.conditions.isFiltering}`,'font-size:8px;')
-        console.log(`%c Current liked : ${this.actions.likes}`,'font-size:8px;')
-        console.log(`%c Current follows : ${this.actions.follows.length}`,'font-size:8px;')
         if(this.conditions.isFiltering){
             console.log(`%cLike limit ? : ${this.conditions.maxLiked}`,'font-size:8px;')
             console.log(`%cLikes max ? : ${this.conditions.maxLikes} likes`,'font-size:8px;')
@@ -90,6 +89,14 @@ class InstaBot {
         } else {
             console.log(`InstaBot will like anything but won't follow nor comment`)
         }
+        console.log(`%cResults`,'font-size:10px;font-weight:bold;')
+        console.log(`%c Current liked : ${this.actions.likes}`,'font-size:8px;')
+        console.log(`%c Current follows : ${this.actions.follows.length}`,'font-size:8px;')
+        (this.actions.follows.length>0)
+            ?  this.actions.follows.forEach((f)=>{
+                console.log(`%c${f.personName}: ${f.personLink}`, "font-weight:bold; font-size:8px;");
+            })
+            :null
     }
     createUI(){
         const left = document.createElement("DIV");
@@ -323,7 +330,7 @@ class InstaBot {
                 if(this.actions.follows.length>0){
                     console.log(`%cTotal Follow count: ${this.actions.follows.length}`, "font-weight:bold; font-size:12px;");
                     this.actions.follows.forEach((f)=>{
-                        console.log(`%c${f.personName}: ${f.personLink}`, "font-weight:bold; font-size:12px;");
+                        console.log(`%c${f.personName}: ${f.personLink}`, "font-weight:bold; font-size:8px;");
                     })
                 }
             }
