@@ -59,7 +59,7 @@ class InstaBot {
             extraReply: 'span.glyphsSpriteCircle_add__outline__24__grey_9.u-__7',
             tags : 'article a[href*="/tags/"]',
             nextBtn: 'a.coreSpriteRightPaginationArrow',
-            followBtn: 'button.oW_lN',
+            followBtn: 'button.oW_lN:not(_8A5w5)',
             followersBtn : 'a.-nal3, a._81NM2',
             followersOverHidden : '.isgrP',
             followersInnerHeight : 'ul.jSC57._6xe7A',
@@ -346,25 +346,31 @@ class InstaBot {
             ){
                 const person = this.getName();
                 const followBtn = document.querySelector(this.element.followBtn)
-                followBtn.click();
-                this.actions.follows.push(person);
-                console.log('%c THIS PERSON HAS BEEN FOLLOWED', 'font-size:8px;font-weight:bold;');
-            } else if(!isSafeImage){
-                console.log('%c Poor image to follow', 'font-size:8px;font-weight:bold;');
-            } else if(this.actions.follows.length >= this.conditions.maxFollows){
-                console.log('%c FOLLOW LIMIT EXCEEDED', 'font-size:8px;font-weight:bold;');
+                if(followBtn){
+                    followBtn.click();
+                    this.actions.follows.push(person);
+                    console.log('%c THIS PERSON HAS BEEN FOLLOWED', 'font-size:8px;font-weight:bold;');
+                    return true;
+                }
+            } else {
+                if(!isSafeImage){
+                    console.log('%c Poor image to follow', 'font-size:8px;font-weight:bold;');
+                } else if(this.actions.follows.length >= this.conditions.maxFollows){
+                    console.log('%c FOLLOW LIMIT EXCEEDED', 'font-size:8px;font-weight:bold;');
+                }
+                return false;
             }
         }
     }
     async writeComment({ hasF4F, hasL4L }){
         const f4fcom = this.comments.comments.followback;
         const l4lcom = this.comments.comments.likeback;
-        this.follow(hasF4F);
+        const followed = this.follow(hasF4F);
         if(this.conditions.isFiltering && (hasF4F || hasL4L)){
             const input = document.querySelector('.Ypffh'); 
             const lastValue = input.value;
             input.value =
-                (hasF4F)
+                (hasF4F && followed)
                 ? this.generateRandomComment(f4fcom)
                 :(hasL4L)
                 ? this.generateRandomComment(l4lcom)
