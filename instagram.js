@@ -69,6 +69,7 @@ class InstaBot {
             commentPostBtn : '.X7cDz button',
         }
         this.createStartPanel();
+        this.createToggleForceBtn();
     }
     status(){
         console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,'font-size:8px;')
@@ -86,11 +87,21 @@ class InstaBot {
             console.log(`InstaBot will like anything but won't follow nor comment`)
         }
     }
+    createToggleForceBtn(){
+        const self = this;
+        const btn = document.createElement("BUTTON");
+        btn.innerHTML = "ToggleForce";
+        btn.style="position:fixed;bottom:10px;left:10px;padding:15px;background:SteelBlue;color:white;z-index:99;"
+        document.body.appendChild(btn);
+        btn.addEventListener('click',function(){
+            self.toggleFilter();
+        })
+    }
     createStartPanel(){
         const self = this;
         const btn = document.createElement("BUTTON");
         btn.innerHTML = "START INSTABOT";
-        btn.style="position:fixed;bottom:0;right:0;padding:15px;background:SteelBlue;color:white;z-index:99;"
+        btn.style="position:fixed;bottom:10px;right:10px;padding:15px;background:orange;color:white;z-index:99;"
         document.body.appendChild(btn);
         btn.addEventListener('click',function(){
             self.init();
@@ -101,7 +112,7 @@ class InstaBot {
         const self = this;
         const btn = document.createElement("BUTTON");
         btn.innerHTML = "STOP INSTABOT";
-        btn.style="position:fixed;bottom:0;right:0;padding:15px;background:tomato;color:white;z-index:99;"
+        btn.style="position:fixed;bottom:10px;right:10px;padding:15px;background:tomato;color:white;z-index:99;"
         document.body.appendChild(btn);
         btn.addEventListener('click',function(){
             self.stop();
