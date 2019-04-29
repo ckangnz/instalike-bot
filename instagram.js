@@ -23,7 +23,10 @@ class InstaBot {
                 'follow','followme','맞팔','팔로우','맞팔해요','파로윙',
             ] || [],
             exclude: [
-                '10k','20k','30k','10kfollowers','20kfollowers'
+                '10k','20k','30k','10kfollowers','20kfollowers','댓글',
+                '흔남','훈남','얼스타그램',
+                '육아스타그램','육아',
+                '맛집',
             ]
         }
         this.comments = {
