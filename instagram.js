@@ -17,6 +17,9 @@ class InstaBot {
             minLikes: 20,
             maxLikes : 300,
             isFiltering: true,
+            image : [ 
+                '1 person','people','closeup','selfie',
+            ],
             include: [
                 '인스타','인친',
                 "라이크",'좋아요','좋아요환영','좋아요반사','라이크반사','반사','l4l','like','instalike',
@@ -46,6 +49,7 @@ class InstaBot {
         };
         this.element = {
             name : 'a.notranslate:first-child',
+            image: 'article div[role=button] .KL4Bh img.FFVAD',
             post: "a[href*='/p/']:not(.zV_Nj)",
             recentPost : '.yQ0j1:nth-child(2) ~ div a[href*="/p/"]:not(.zV_Nj)',
             numberOfLikes : `article section div div:last-child button[type=button] span,
@@ -63,6 +67,7 @@ class InstaBot {
             followerPopupCloseBtn:'span[aria-label="Close"]',
             suggestionsTitle: 'h4._7UhW9',
         }
+        this.createStartPanel();
     }
     status(){
         console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,'font-size:8px;')
@@ -79,6 +84,28 @@ class InstaBot {
         } else {
             console.log(`InstaBot will like anything but won't follow nor comment`)
         }
+    }
+    createStartPanel(){
+        const self = this;
+        const btn = document.createElement("BUTTON");
+        btn.innerHTML = "START INSTABOT";
+        btn.style="position:absolute;bottom:0;right:0;padding:15px;background:SteelBlue;color:white;z-index:99;"
+        document.body.appendChild(btn);
+        btn.addEventListener('click',function(){
+            self.init();
+            this.parentNode.removeChild(this); return this;
+        })
+    }
+    createStopBtn(){
+        const self = this;
+        const btn = document.createElement("BUTTON");
+        btn.innerHTML = "STOP INSTABOT";
+        btn.style="position:absolute;bottom:0;right:0;padding:15px;background:tomato;color:white;z-index:99;"
+        document.body.appendChild(btn);
+        btn.addEventListener('click',function(){
+            self.stop();
+            this.parentNode.removeChild(this); return this;
+        })
     }
     init(includeTop = true){
         this.actions.stopped = false;
@@ -98,17 +125,6 @@ class InstaBot {
         const delay = (Math.random()+0.3)*this.time.delayInitial;
         this.waitFor(delay,()=>{
             this.processPost(); // Initial like to start off the chain reaction
-        })
-    }
-    createStopBtn(){
-        const self = this;
-        const btn = document.createElement("BUTTON");
-        btn.innerHTML = "STOP INSTABOT";
-        btn.style="position:absolute;bottom:0;right:0;padding:15px;background:tomato;color:white;"
-        document.body.appendChild(btn);
-        btn.addEventListener('click',function(){
-            self.stop();
-            this.parentNode.removeChild(this); return this;
         })
     }
     getName(){
@@ -170,6 +186,14 @@ class InstaBot {
             hasL4L:hasL4L.length>0,
         }
     }
+    checkImage(){
+        const alt = document.querySelector(this.element.image).alt;
+        const isSafe = this.conditions.image.some((v)=> { 
+            return alt.indexOf(v) >= 0;
+        });
+        if(isSafe) console.log(`%c ${alt}`, 'font-size:8px;');
+        return isSafe;
+    }
     processPost(){
         console.log(`%c=======================`,'color:white;');
         const delay = (Math.random()+0.3)*this.time.delayLike;
@@ -207,7 +231,7 @@ class InstaBot {
                     this.goToNextImage();
                 } else {
                     if(tags.hasExcludes.length > 0){
-                        console.log(`%cFound unwanted tags:`,'font-size:8px; color:lightgray!important;', hasExcludes.join(','));
+                        console.log(`%cFound unwanted tags:`,'font-size:8px; color:lightgray!important;', tags.hasExcludes.join(','));
                     } else {
                         console.log(`%cNo Matching tags.`,'font-size:8px; color:red!important;');
                     }
@@ -314,15 +338,19 @@ class InstaBot {
     follow(hasF4F){
         if(hasF4F && this.conditions.isFiltering){
             const likes = this.getNumberOfLikes();
+            const isSafeImage = this.checkImage();
             if(
                 likes >= this.conditions.minLikes && likes <= this.conditions.maxLikes 
                 && this.actions.follows.length < this.conditions.maxFollows
+                && isSafeImage 
             ){
                 const person = this.getName();
                 const followBtn = document.querySelector(this.element.followBtn)
                 followBtn.click();
                 this.actions.follows.push(person);
                 console.log('%c THIS PERSON HAS BEEN FOLLOWED', 'font-size:8px;font-weight:bold;');
+            } else if(!isSafeImage){
+                console.log('%c Poor image to follow', 'font-size:8px;font-weight:bold;');
             } else if(this.actions.follows.length >= this.conditions.maxFollows){
                 console.log('%c FOLLOW LIMIT EXCEEDED', 'font-size:8px;font-weight:bold;');
             }
