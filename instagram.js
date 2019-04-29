@@ -17,7 +17,7 @@ class InstaBot {
             minLikes: 20,
             maxLikes : 300,
             isFiltering: true,
-            image : [ 
+            imageAlt : [ 
                 '1 person','people','closeup','selfie',
             ],
             include: [
@@ -27,7 +27,7 @@ class InstaBot {
             ] || [],
             exclude: [
                 '10k','20k','30k','10kfollowers','20kfollowers','댓글',
-                '흔남','훈남','얼스타그램',
+                '흔남','훈남',
                 '육아스타그램','육아',
                 '맛집',
             ]
@@ -65,11 +65,11 @@ class InstaBot {
             followersInnerHeight : 'ul.jSC57._6xe7A',
             followersList: 'a.FPmhX.notranslate._0imsa',
             followerPopupCloseBtn:'span[aria-label="Close"]',
+            followerPopupLoadingIcon : '.W1Bne.ztp9m',
             suggestionsTitle: 'h4._7UhW9',
             commentPostBtn : '.X7cDz button',
         }
-        this.createStartPanel();
-        this.createToggleForceBtn();
+        this.createUI();
     }
     status(){
         console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,'font-size:8px;')
@@ -87,43 +87,75 @@ class InstaBot {
             console.log(`InstaBot will like anything but won't follow nor comment`)
         }
     }
-    createToggleForceBtn(){
+    createUI(){
+        const left = document.createElement("DIV");
+        const right = document.createElement("DIV");
+        left.style="position:fixed;bottom:10px;left:10px;padding:15px;z-index:99;"
+        right.style="position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;"
+        document.body.appendChild(left);
+        document.body.appendChild(right);
+        this.createStartPanel(right);
+        this.createToggleFilter(left);
+    }
+    createBtn({text, bgc, parent}){
         const self = this;
         const btn = document.createElement("BUTTON");
-        btn.innerHTML = "ToggleForce";
-        btn.style="position:fixed;bottom:10px;left:10px;padding:15px;background:SteelBlue;color:white;z-index:99;"
-        document.body.appendChild(btn);
-        btn.addEventListener('click',function(){
+        btn.innerHTML = text;
+        btn.style=`padding:15px;background:${bgc};color:white;`
+        parent.appendChild(btn);
+        return btn;
+    }
+    createToggleFilter(parent){
+        const self = this;
+        const btn = this.createBtn({
+            text:"Filtering ON",
+            bgc: "SteelBlue",
+            parent,
+        })
+        btn.addEventListener('click',function(e){
+            e.stopPropagation();
             self.toggleFilter();
+            this.classList.toggle('deactivated');
+            if(this.className == 'deactivated'){
+                this.style.background = 'tomato';
+                this.innerText = "Filtering OFF"
+            } else {
+                this.style.background="SteelBlue";
+                this.innerText = "Filtering ON"
+            }
         })
     }
-    createStartPanel(){
+    createStartPanel(parent){
         const self = this;
-        const btn = document.createElement("BUTTON");
-        btn.innerHTML = "START INSTABOT";
-        btn.style="position:fixed;bottom:10px;right:10px;padding:15px;background:orange;color:white;z-index:99;"
-        document.body.appendChild(btn);
-        btn.addEventListener('click',function(){
+        const btn = this.createBtn({
+            text:"Start Instabot",
+            bgc: "orange",
+            parent,
+        })
+        btn.addEventListener('click',function(e){
+            e.stopPropagation();
             self.init();
+            self.createStopBtn(parent);
             this.parentNode.removeChild(this); return this;
         })
     }
-    createStopBtn(){
+    createStopBtn(parent){
         const self = this;
-        const btn = document.createElement("BUTTON");
-        btn.innerHTML = "STOP INSTABOT";
-        btn.style="position:fixed;bottom:10px;right:10px;padding:15px;background:tomato;color:white;z-index:99;"
-        document.body.appendChild(btn);
-        btn.addEventListener('click',function(){
+        const btn = this.createBtn({
+            text:"Stop",
+            bgc: "tomato",
+            parent,
+        })
+        btn.addEventListener('click',function(e){
+            e.stopPropagation();
             self.stop();
-            self.createStartPanel();
+            self.createStartPanel(parent);
             this.parentNode.removeChild(this); return this;
         })
     }
     init(includeTop = true){
         this.actions.stopped = false;
         this.time.start = performance.now();
-        this.createStopBtn();
         if(this.actions.likes > 0){
             console.log(`Resetting likes from ${this.actions.likes} to 0`)
             this.actions.likes = 0;
@@ -199,13 +231,24 @@ class InstaBot {
             hasL4L:hasL4L.length>0,
         }
     }
-    checkImage(){
+    checkImageAlt(){
         const alt = document.querySelector(this.element.image).alt;
-        const isSafe = this.conditions.image.some((v)=> { 
+        const isSafe = this.conditions.imageAlt.some((v)=> {
             return alt.indexOf(v) >= 0;
         });
         if(isSafe) console.log(`%c ${alt}`, 'font-size:8px;');
         return isSafe;
+    }
+    likePost(){
+        const likebtn = document.querySelector(this.element.likeBtn);
+        if(likebtn){
+            //likebtn.click();
+            //this.actions.likes++
+            console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
+        } else {
+            console.log(`%cAlready liked.`,'font-size:8px; color:red!important;');
+        }
+        this.goToNextImage();
     }
     processPost(){
         console.log(`%c=======================`,'color:white;');
@@ -219,29 +262,19 @@ class InstaBot {
                 && ((numberOfLikes >= this.conditions.minLikes && numberOfLikes <= this.conditions.maxLikes && this.conditions.isFiltering) 
                 || !this.conditions.isFiltering) 
             ){
-                const likebtn = document.querySelector(this.element.likeBtn);
                 const extraReply = document.querySelectorAll(this.element.extraReply); extraReply? extraReply.forEach((t)=>t.click()):true;
                 const reply = document.querySelectorAll(this.element.reply); reply ? reply.forEach((t)=>t.click()):true;
                 const tags = this.checkTags();
 
                 if(( tags.hasTag.length > 0 && tags.hasExcludes == 0 && this.conditions.isFiltering ) || !this.conditions.isFiltering){
-                    if(likebtn){
-                        if(!this.conditions.isFiltering){
-                            console.log(`%c Not Filtering:`,'font-size:8px; color:lightgray!important;');
-                        } else {
-                            console.log(`%cFound matching ${tags.hasTag.length} tags:`,'font-size:8px; color:lightgray!important;', tags.hasTag.join(','));
-                            console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray!important;');
-                        }
-                        likebtn.click();
-                        this.actions.likes++
-                        console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
-                        if(this.conditions.isFiltering){
-                            this.writeComment(tags);
-                        }
+                    if(!this.conditions.isFiltering){
+                        console.log(`%c Not Filtering:`,'font-size:8px; color:lightgray!important;');
                     } else {
-                        console.log(`%cAlready liked.`,'font-size:8px; color:red!important;');
+                        console.log(`%cFound matching ${tags.hasTag.length} tags:`,'font-size:8px; color:lightgray!important;', tags.hasTag.join(','));
+                        console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray!important;');
                     }
-                    this.goToNextImage();
+                    this.likePost();
+                    (this.conditions.isFiltering)?this.writeComment(tags):false;
                 } else {
                     if(tags.hasExcludes.length > 0){
                         console.log(`%cFound unwanted tags:`,'font-size:8px; color:lightgray!important;', tags.hasExcludes.join(','));
@@ -294,8 +327,8 @@ class InstaBot {
         });
     }
     async showWhoUnfollowedMe(){
-        const following = await this.loadFollowings();
-        const followers = await this.loadFollowers();
+        const following = await this.loadFollowers(true);
+        const followers = await this.loadFollowers(false);
         const unfollowers = following.filter(function(f){
             return this.indexOf(f) == -1;
         },followers)
@@ -304,20 +337,15 @@ class InstaBot {
             console.log(`%c ${f} :  https://www.instagram.com/${f}`,'font-size:8px;color:grey;')
         })
     }
-    async loadFollowings(){
-        console.log("Loading user's following list.. Please wait.." );
+    async loadFollowers(loadingFollowings){
+        (loadingFollowings)
+            ?console.log("Loading user's following list.. Please wait.." )
+            :console.log("Loading user's followers... Please wait...")
         return new Promise(async resolve => {
             const flBtn = document.querySelectorAll(this.element.followersBtn);
-            flBtn[flBtn.length-1].click();
-            const result = await this.fetchPeople();
-            resolve(result);
-        })
-    }
-    async loadFollowers(){
-        console.log("Loading user's followers... Please wait...");
-        return new Promise(async resolve => {
-            const flBtn = document.querySelectorAll(this.element.followersBtn);
-            flBtn[0].click();
+            (loadingFollowings)
+                ? flBtn[flBtn.length-1].click()
+                : flBtn[0].click()
             const result = await this.fetchPeople();
             resolve(result);
         })
@@ -330,7 +358,7 @@ class InstaBot {
                     const loadedHeight = document.querySelector(this.element.followersInnerHeight).scrollHeight
                     const isLoading = (document.querySelector(this.element.suggestionsTitle))
                     ? scroll.scrollTop != loadedHeight
-                    : (document.querySelector('.W1Bne.ztp9m'))?true:scroll.scrollTop + scroll.offsetHeight != loadedHeight 
+                    : (document.querySelector(this.element.followerPopupLoadingIcon))?true:scroll.scrollTop + scroll.offsetHeight != loadedHeight 
                     if(isLoading){
                         scroll.scrollTop = loadedHeight;
                     } else {
@@ -351,7 +379,7 @@ class InstaBot {
     follow(hasF4F){
         if(hasF4F && this.conditions.isFiltering){
             const likes = this.getNumberOfLikes();
-            const isSafeImage = this.checkImage();
+            const isSafeImage = this.checkImageAlt();
             if(
                 likes >= this.conditions.minLikes && likes <= this.conditions.maxLikes 
                 && this.actions.follows.length < this.conditions.maxFollows
@@ -360,9 +388,9 @@ class InstaBot {
                 const person = this.getName();
                 const followBtn = document.querySelector(this.element.followBtn)
                 if(followBtn){
-                    followBtn.click();
-                    this.actions.follows.push(person);
-                    console.log(`%cFollowed:  ${person.personLink}`, "font-weight:bold; font-style:italic; ");
+                    //followBtn.click();
+                    //this.actions.follows.push(person);
+                    console.log(`%cFollowed: ${person.personLink}`, "font-weight:bold; font-style:italic; ");
                     return true;
                 }
             } else {
@@ -383,12 +411,13 @@ class InstaBot {
         if(this.conditions.isFiltering && (hasF4F || hasL4L)){
             const input = document.querySelector('.Ypffh'); 
             const lastValue = input.value;
-            input.value =
+            const generatedComment = 
                 (hasF4F && followed)
                 ? this.generateRandomComment(f4fcom)
                 :(hasL4L)
                 ? this.generateRandomComment(l4lcom)
                 :null;
+            input.value = generatedComment;
             const event = new Event('change', { bubbles: true });
             event.simulated = true;
             const tracker = input._valueTracker;
@@ -396,7 +425,7 @@ class InstaBot {
                 tracker.setValue(lastValue);
             }
             input.dispatchEvent(event);
-            (input.value!=null)? await this.submitComment(input.value): false;
+            (input.value!=null)? await this.submitComment(generatedComment): false;
         }
     }
     generateRandomComment(c){
@@ -408,7 +437,7 @@ class InstaBot {
          return new Promise(resolve=>{
              this.waitFor(delay,()=>{
                  console.log(`%c Commented : "${comment}"`, 'font-weight:bold; font-style:italic; ')
-                 resolve(btn.click());
+                 //resolve(btn.click());
              })
          })
     }
