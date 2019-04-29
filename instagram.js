@@ -6,8 +6,8 @@ class InstaBot {
         this.time = {
             start: performance.now(),
             delayInitial: 2 * this.s,
-            delayLike: 4 * this.s, // Delay to like the image
-            delayNext: 3 * this.s, // Delay to load next image
+            delayLike: 3 * this.s, // Delay to like the image
+            delayNext: 4 * this.s, // Delay to load next image
             delayComment: 4 * this.s, // Delay to comment
             maxDuration: 10 * this.min, // Max runtime before the script stops liking
         };
@@ -34,7 +34,7 @@ class InstaBot {
         }
         this.comments = {
             conditions : {
-                followback : ['선팔맞팔','맞팔'],
+                followback : ['선팔맞팔','선팔하면맞팔'],
                 likeback : ['좋아요반사','라이크반사','좋반']
             },
             comments : {
@@ -59,13 +59,14 @@ class InstaBot {
             extraReply: 'span.glyphsSpriteCircle_add__outline__24__grey_9.u-__7',
             tags : 'article a[href*="/tags/"]',
             nextBtn: 'a.coreSpriteRightPaginationArrow',
-            followBtn: 'button.oW_lN:not(_8A5w5)',
+            followBtn: 'button.oW_lN:not(._8A5w5)',
             followersBtn : 'a.-nal3, a._81NM2',
             followersOverHidden : '.isgrP',
             followersInnerHeight : 'ul.jSC57._6xe7A',
             followersList: 'a.FPmhX.notranslate._0imsa',
             followerPopupCloseBtn:'span[aria-label="Close"]',
             suggestionsTitle: 'h4._7UhW9',
+            commentPostBtn : '.X7cDz button',
         }
         this.createStartPanel();
     }
@@ -89,7 +90,7 @@ class InstaBot {
         const self = this;
         const btn = document.createElement("BUTTON");
         btn.innerHTML = "START INSTABOT";
-        btn.style="position:absolute;bottom:0;right:0;padding:15px;background:SteelBlue;color:white;z-index:99;"
+        btn.style="position:fixed;bottom:0;right:0;padding:15px;background:SteelBlue;color:white;z-index:99;"
         document.body.appendChild(btn);
         btn.addEventListener('click',function(){
             self.init();
@@ -100,10 +101,11 @@ class InstaBot {
         const self = this;
         const btn = document.createElement("BUTTON");
         btn.innerHTML = "STOP INSTABOT";
-        btn.style="position:absolute;bottom:0;right:0;padding:15px;background:tomato;color:white;z-index:99;"
+        btn.style="position:fixed;bottom:0;right:0;padding:15px;background:tomato;color:white;z-index:99;"
         document.body.appendChild(btn);
         btn.addEventListener('click',function(){
             self.stop();
+            self.createStartPanel();
             this.parentNode.removeChild(this); return this;
         })
     }
@@ -116,7 +118,7 @@ class InstaBot {
             this.actions.likes = 0;
         }
         if(this.actions.follows.length > 0){
-            console.log(`Resetting likes from ${this.actions.likes} to 0`)
+            console.log(`Resetting followers from ${this.actions.likes} to 0`)
             this.actions.follows = [];
         }
         const post = (includeTop)?document.querySelector(this.element.post):document.querySelector(this.element.recentPost)
@@ -200,7 +202,7 @@ class InstaBot {
         this.waitFor(delay, ()=>{
             const { personName, personLink } = this.getName() || {};
             const numberOfLikes = this.getNumberOfLikes();
-            console.log(`%c Analyzing %c${personName}`,'color:dodgerblue;font-weight:bold;','background:yellow; text-decoration:underline;');
+            console.log(`%c Analyzing %c${personName}`,'color:dodgerblue;font-weight:bold;','background:GoldenRod;color:white!important;text-decoration:underline;');
             console.log(`%c${personLink}`,'font-size:8px;');
             if( personName != null 
                 && ((numberOfLikes >= this.conditions.minLikes && numberOfLikes <= this.conditions.maxLikes && this.conditions.isFiltering) 
@@ -349,7 +351,7 @@ class InstaBot {
                 if(followBtn){
                     followBtn.click();
                     this.actions.follows.push(person);
-                    console.log('%c THIS PERSON HAS BEEN FOLLOWED', 'font-size:8px;font-weight:bold;');
+                    console.log(`%cFollowed:  ${person.personLink}`, "font-weight:bold; font-style:italic; ");
                     return true;
                 }
             } else {
@@ -366,6 +368,7 @@ class InstaBot {
         const f4fcom = this.comments.comments.followback;
         const l4lcom = this.comments.comments.likeback;
         const followed = this.follow(hasF4F);
+
         if(this.conditions.isFiltering && (hasF4F || hasL4L)){
             const input = document.querySelector('.Ypffh'); 
             const lastValue = input.value;
@@ -382,17 +385,19 @@ class InstaBot {
                 tracker.setValue(lastValue);
             }
             input.dispatchEvent(event);
-            (input.value!=null)? await this.submitComment(): false;
+            (input.value!=null)? await this.submitComment(input.value): false;
         }
     }
     generateRandomComment(c){
         return c[ Math.floor(Math.random()*c.length) ]
     }
-     submitComment(){
+     submitComment(comment){
          const delay = (Math.random()+0.3)*this.time.delayInitial;
+         const btn = document.querySelector(this.element.commentPostBtn);
          return new Promise(resolve=>{
              this.waitFor(delay,()=>{
-                 resolve(document.querySelector('.X7cDz button').click());
+                 console.log(`%c Commented : "${comment}"`, 'font-weight:bold; font-style:italic; ')
+                 resolve(btn.click());
              })
          })
     }
