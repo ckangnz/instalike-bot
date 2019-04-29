@@ -78,6 +78,7 @@ class InstaBot {
     init(includeTop = true){
         this.actions.stopped = false;
         this.time.start = performance.now();
+        this.createStopBtn();
         if(this.actions.likes > 0){
             console.log(`Resetting likes from ${this.actions.likes} to 0`)
             this.actions.likes = 0;
@@ -92,6 +93,17 @@ class InstaBot {
         const delay = (Math.random()+0.3)*this.time.delayInitial;
         this.waitFor(delay,()=>{
             this.processPost(); // Initial like to start off the chain reaction
+        })
+    }
+    createStopBtn(){
+        const self = this;
+        const btn = document.createElement("BUTTON");
+        btn.innerHTML = "STOP INSTABOT";
+        btn.style="position:absolute;bottom:0;right:0;padding:15px;background:tomato;color:white;"
+        document.body.appendChild(btn);
+        btn.addEventListener('click',function(){
+            self.stop();
+            this.parentNode.removeChild(this); return this;
         })
     }
     getName(){
@@ -357,6 +369,7 @@ class InstaBot {
             : console.log(`%c Filtering turned OFF`, 'background:red;color:white!important;')
     }
     stop(){
+        console.log(`%c STOPPED`, 'font-weight:bold;');
         this.actions.stopped = true;
     }
     waitFor(_s, _c){
