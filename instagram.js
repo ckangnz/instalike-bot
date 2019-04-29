@@ -34,17 +34,21 @@ class InstaBot {
         }
         this.comments = {
             conditions : {
-                followback : ['선팔맞팔','선팔하면맞팔'],
+                followback : ['선팔맞팔','선팔하면맞팔','선팔하면맞팔가요'],
                 likeback : ['좋아요반사','라이크반사','좋반']
             },
             comments : {
-                followback: ['선팔하구 가요!','선팔했어요!','선팔합니다 :)','맞팔해요:)','맞팔할까요😊'],
-                likeback: ['좋반요!','좋아요반사요!','좋반이요 ㅎㅎ']
-            }
+                followback: [
+                    '선팔하구 가요! 맞팔해요','선팔했어요! 맞팔해용','선팔합니다~ 맞팔해주시꺼죠?',
+                    '맞팔해요','맞팔해주세요','맞팔할까요'
+                ],
+                likeback: ['좋반요!','좋아요반사요!','좋반이요']
+            },
+            emoji: [ '😊','😛','🤗','😄','🤙','👍','🙌','🙏', ]
         }
         this.actions = {
-            likes: 0, // Counter used for console logging
-            follows:[],
+            likes: 0, // How many I liked
+            follows:[], //People I followed
             stopped: false,
         };
         this.element = {
@@ -242,8 +246,8 @@ class InstaBot {
     likePost(){
         const likebtn = document.querySelector(this.element.likeBtn);
         if(likebtn){
-            //likebtn.click();
-            //this.actions.likes++
+            likebtn.click();
+            this.actions.likes++
             console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
         } else {
             console.log(`%cAlready liked.`,'font-size:8px; color:red!important;');
@@ -299,7 +303,6 @@ class InstaBot {
     goToNextImage(){
         const delay = (Math.random()+0.4)* this.time.delayNext;
         this.waitFor(delay, ()=>{
-            // Go to next image
             const el = document.querySelector(this.element.nextBtn);
 
             if(this.actions.likes >= this.conditions.maxLiked) { 
@@ -388,8 +391,8 @@ class InstaBot {
                 const person = this.getName();
                 const followBtn = document.querySelector(this.element.followBtn)
                 if(followBtn){
-                    //followBtn.click();
-                    //this.actions.follows.push(person);
+                    followBtn.click();
+                    this.actions.follows.push(person);
                     console.log(`%cFollowed: ${person.personLink}`, "font-weight:bold; font-style:italic; ");
                     return true;
                 }
@@ -417,7 +420,8 @@ class InstaBot {
                 :(hasL4L)
                 ? this.generateRandomComment(l4lcom)
                 :null;
-            input.value = generatedComment;
+            const generateEmoji = this.generateRandomComment(this.comments.emoji)
+            input.value = generatedComment + generateEmoji;
             const event = new Event('change', { bubbles: true });
             event.simulated = true;
             const tracker = input._valueTracker;
@@ -437,7 +441,7 @@ class InstaBot {
          return new Promise(resolve=>{
              this.waitFor(delay,()=>{
                  console.log(`%c Commented : "${comment}"`, 'font-weight:bold; font-style:italic; ')
-                 //resolve(btn.click());
+                 resolve(btn.click());
              })
          })
     }
