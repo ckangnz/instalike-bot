@@ -11,6 +11,7 @@ class InstaBot {
             maxDuration: 10 * this.min, // Max runtime before the script stops liking
         };
         this.conditions = {
+            maxLiked: 80,
             maxLikes : 300,
             isFiltering: true,
             include: [
@@ -28,6 +29,8 @@ class InstaBot {
         };
         this.element = {
             name : 'a.notranslate:first-child',
+            post: "a[href*='/p/']",
+            recentPost : '.yQ0j1:nth-child(2) ~ div a[href*="/p/"]',
             numberOfLikes : 'article section div div:last-child button[type=button] span',
             likeBtn:'article span.glyphsSpriteHeart__outline__24__grey_9.u-__7',
             reply: 'span.EizgU',
@@ -44,17 +47,20 @@ class InstaBot {
     check(){
         console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,'font-size:15px;')
         console.log(`%Filtering? : ${this.conditions.isFiltering}`,'font-size:15px;')
-        console.log(`%cMax Likes? : ${this.conditions.maxLikes}`,'font-size:15px;')
+        console.log(`%cMax like ? : ${this.conditions.maxLiked}`,'font-size:15px;')
+        console.log(`%cLikes less than ? : ${this.conditions.maxLikes} likes`,'font-size:15px;')
         console.log(`%cTags required? : ${this.conditions.include.join(',')}`,'font-size:15px;')
     }
     init(includeTop = true){
-        this.time.start = performance.now();
         this.actions.stopped = false;
-        if(includeTop){
-            document.querySelector('a[href*="/p/"]').click(); // Click first image from Recent
-        } else {
-            document.querySelector('.yQ0j1:nth-child(2) ~ div a[href*="/p/"]').click(); // Click first image from Top Posts
+        this.time.start = performance.now();
+        if(this.actions.likes > 0){
+            console.log(`Resetting likes from ${this.actions.likes} to 0`)
+            this.actions.likes = 0;
         }
+        const post = (includeTop)?document.querySelector(this.element.post):document.querySelector(this.element.recentPost)
+        post.click(); // Click first image from Top Posts
+
         const delay = (Math.random()+0.3)*this.time.delayInitial;
         this.waitFor(delay,()=>{
             this.likeImage(); // Initial like to start off the chain reaction
@@ -152,8 +158,14 @@ class InstaBot {
             // Go to next image
             const el = document.querySelector(this.element.nextBtn);
 
+            if(this.actions.likes >= this.conditions.maxLiked) { 
+                console.log(`%cYou have already liked ${this.conditions.maxLiked} images. Restarting will reset`,'font-weight:bold;font-size:8px;');
+                this.stop();
+            }  
+
             el ? el.click() : true;
             if(performance.now() - this.time.start < this.time.maxDuration && !this.actions.stopped){
+                console.log(`%cAvailable likes Remaining: ${this.conditions.maxLiked - this.actions.likes}`,'color:gray;font-size:6px;font-style:italic');
                 console.log(`%cTime remaining: ${ Math.round((this.time.maxDuration - (performance.now() - this.time.start))/this.min*10)/10} minutes`,'color:gray;font-size:6px;font-style:italic');
                 this.likeImage();
             }
