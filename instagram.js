@@ -64,9 +64,11 @@ class InstaBot {
             suggestionsTitle: 'h4._7UhW9',
         }
     }
-    check(){
+    status(){
         console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,'font-size:8px;')
         console.log(`%cFiltering? : ${this.conditions.isFiltering}`,'font-size:8px;')
+        console.log(`%c Current liked : ${this.actions.likes}`,'font-size:8px;')
+        console.log(`%c Current follows : ${this.actions.follows.length}`,'font-size:8px;')
         if(this.conditions.isFiltering){
             console.log(`%cLike limit ? : ${this.conditions.maxLiked}`,'font-size:8px;')
             console.log(`%cLikes max ? : ${this.conditions.maxLikes} likes`,'font-size:8px;')
