@@ -6,8 +6,8 @@ class InstaBot {
         this.time = {
             start: performance.now(),
             delayInitial: 2 * this.s,
-            delayLike: 4 * this.s, // Delay from the image is shown to the image is liked
-            delayNext: 3 * this.s, // Delay from the image is liked to the next image is loaded
+            delayLike: 4 * this.s, // Delay to like the image
+            delayNext: 3 * this.s, // Delay to load next image
             maxDuration: 10 * this.min, // Max runtime before the script stops liking
         };
         this.conditions = {
@@ -29,8 +29,8 @@ class InstaBot {
         };
         this.element = {
             name : 'a.notranslate:first-child',
-            post: "a[href*='/p/']",
-            recentPost : '.yQ0j1:nth-child(2) ~ div a[href*="/p/"]',
+            post: "a[href*='/p/']:not(.zV_Nj)",
+            recentPost : '.yQ0j1:nth-child(2) ~ div a[href*="/p/"]:not(.zV_Nj)',
             numberOfLikes : 'article section div div:last-child button[type=button] span',
             likeBtn:'article span.glyphsSpriteHeart__outline__24__grey_9.u-__7',
             reply: 'span.EizgU',
@@ -99,7 +99,6 @@ class InstaBot {
             if( personName != null && 
                 ((numberOfLikes < this.conditions.maxLikes && this.conditions.isFiltering) || !this.conditions.isFiltering) 
             ){
-                const self = this;
                 const likebtn = document.querySelector(this.element.likeBtn);
                 const extraReply = document.querySelectorAll(this.element.extraReply); extraReply? extraReply.forEach((t)=>t.click()):true;
                 const reply = document.querySelectorAll(this.element.reply); reply ? reply.forEach((t)=>t.click()):true;
