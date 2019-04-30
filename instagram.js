@@ -43,7 +43,7 @@ class InstaBot {
                     '선팔하구 가요! 맞팔해요','선팔했어요! 맞팔해용','선팔합니다~ 맞팔해주시꺼죠?',
                     '맞팔해요','맞팔해주세요','맞팔할까요'
                 ],
-                likeback: ['좋반요!','좋아요반사요!','좋반이요']
+                likeback: ['좋반요!','좋아요반사요!','좋반이요','좋반 맞팔해요~~']
             },
             emoji: [ '😊','😛','🤗','😄','🤙','👍','🙌','🙏', ]
         }
@@ -439,7 +439,12 @@ class InstaBot {
     async writeComment({ hasF4F, hasL4L }){
         const f4fcom = this.comments.comments.followback;
         const l4lcom = this.comments.comments.likeback;
-        if(this.conditions.isFiltering && (hasF4F || hasL4L)){
+        const notFollowed = document.querySelector(this.element.followBtn);
+
+        if(this.conditions.isFiltering 
+            && notFollowed 
+            && (hasF4F || hasL4L)
+        ){
             const input = document.querySelector('.Ypffh'); 
             const lastValue = input.value;
             const generatedComment = 
@@ -460,6 +465,8 @@ class InstaBot {
             (input.value!=null)
                 ? await this.submitComment(generatedComment) && await this.follow(hasF4F)
                 : false
+        } else if(!notFollowed) {
+            console.log(`%cAlready followed. Not leaving comments.`,'font-size:8px; color:red!important;');
         }
     }
     submitComment(comment){
