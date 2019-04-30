@@ -477,23 +477,29 @@ class InstaBot {
                 tracker.setValue(lastValue);
             }
             input.dispatchEvent(event);
-            (input.value!=null)
-                ? await this.submitComment(generatedComment) && await this.follow(hasF4F)
-                : false
+            if(input.value!=null){
+                (await this.submitComment(generatedComment))
+                    ? await this.follow(hasF4F)
+                    : console.log(`%cNot following because couldn't comment...`)
+            } 
         } else if(!notFollowed) {
             console.log(`%cAlready followed. Not leaving comments.`,'font-size:8px; color:red!important;');
         }
     }
     submitComment(comment){
         const delay = (Math.random()+0.5)*this.time.delayComment;
-         const btn = document.querySelector(this.element.commentPostBtn);
+        const btn = document.querySelector(this.element.commentPostBtn);
          return new Promise(resolve=>{
-             this.waitFor(delay,()=>{
-                 console.log(`%cPosted comment: "${comment}"`, 'font-weight:bold; font-style:italic; ')
-                 console.log(`%c${window.location.href}`, 'font-size:8px;font-style:italic;')
+             if(btn){
                  btn.click()
-                 resolve(true);
-             })
+                 this.waitFor(delay,()=>{
+                     console.log(`%cPosted comment: "${comment}"`, 'font-weight:bold; font-style:italic; ')
+                     console.log(`%c${window.location.href}`, 'font-size:8px;font-style:italic;')
+                     resolve(true);
+                 })
+             } else {
+                 resolve(false);
+             }
          })
     }
     follow(hasF4F){
