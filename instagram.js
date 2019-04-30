@@ -28,14 +28,14 @@ class InstaBot {
             ] || [],
             exclude: [
                 '10k','20k','30k','10kfollowers','20kfollowers','댓글',
-                '흔남','훈남',
+                '흔남','훈남','셀기꾼',
                 '육아스타그램','육아',
                 '맛집',
             ]
         }
         this.comments = {
             conditions : {
-                followback : ['선팔맞팔','선팔하면맞팔','선팔하면맞팔가요'],
+                followback : ['선팔맞팔','선팔하면맞팔','선팔하면맞팔가요','맞팔'],
                 likeback : ['좋아요반사','라이크반사','좋반']
             },
             comments : {
@@ -93,11 +93,11 @@ class InstaBot {
         console.log(`%cResults`,'font-size:10px;font-weight:bold;')
         console.log(`%c Current liked : ${this.actions.likes}`,'font-size:8px;')
         console.log(`%c Current follows : ${this.actions.follows.length}`,'font-size:8px;')
-        (this.actions.follows.length>0)
-            ?  this.actions.follows.forEach((f)=>{
+        if(this.actions.follows.length>0){
+            this.actions.follows.forEach((f)=>{
                 console.log(`%c${f.personName}: ${f.personLink}`, "font-weight:bold; font-size:8px;");
             })
-            :null
+        }
     }
     createUI(){
         const left = document.createElement("DIV");
@@ -107,16 +107,42 @@ class InstaBot {
         document.body.appendChild(left);
         document.body.appendChild(right);
         this.createStartPanel(right);
+        this.createStatusBtn(left);
+        this.createLikeAllBtn(left);
         this.createToggleIncludeTop(left);
         this.createToggleFilter(left);
     }
-    createBtn({text, bgc, parent}){
+    createBtn({text, bgc, parent}, cb){
         const self = this;
         const btn = document.createElement("BUTTON");
         btn.innerHTML = text;
-        btn.style=`padding:15px;background:${bgc};color:white;`
+        btn.style=`padding:15px;background:${bgc};color:white;outline:none;`
         parent.appendChild(btn);
-        return btn;
+        return cb(btn);
+    }
+    createStatusBtn(parent){
+        const self = this;
+        const btn = this.createBtn({
+            text:"Status",
+            bgc: "dodgerblue",
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                self.status();
+            })
+        })
+    }
+    createLikeAllBtn(parent){
+        const self = this;
+        const btn = this.createBtn({
+            text:"Like All on feed",
+            bgc: "dodgerblue",
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                self.likeAllOnMyFeed();
+            })
+        })
     }
     createToggleFilter(parent){
         const self = this;
@@ -124,17 +150,18 @@ class InstaBot {
             text:"Filtering ON",
             bgc: "SteelBlue",
             parent,
-        })
-        btn.addEventListener('click',function(){
-            self.toggleFilter();
-            this.classList.toggle('deactivated');
-            if(this.className == 'deactivated'){
-                this.style.background = 'tomato';
-                this.innerText = "Filtering OFF"
-            } else {
-                this.style.background="SteelBlue";
-                this.innerText = "Filtering ON"
-            }
+        },b=>{
+            b.addEventListener('click',function(){
+                self.toggleFilter();
+                this.classList.toggle('deactivated');
+                if(this.className == 'deactivated'){
+                    this.style.background = 'tomato';
+                    this.innerText = "Filtering OFF"
+                } else {
+                    this.style.background="SteelBlue";
+                    this.innerText = "Filtering ON"
+                }
+            })
         })
     }
     createToggleIncludeTop(parent){
@@ -143,17 +170,18 @@ class InstaBot {
             text:"From Top",
             bgc: "SteelBlue",
             parent,
-        })
-        btn.addEventListener('click',function(){
-            self.toggleIncludeTop();
-            this.classList.toggle('deactivated');
-            if(this.className == 'deactivated'){
-                this.style.background = 'tomato';
-                this.innerText = "From Recent"
-            } else {
-                this.style.background="SteelBlue";
-                this.innerText = "From Top"
-            }
+        },b=>{
+            b.addEventListener('click',function(){
+                self.toggleIncludeTop();
+                this.classList.toggle('deactivated');
+                if(this.className == 'deactivated'){
+                    this.style.background = 'tomato';
+                    this.innerText = "From Recent"
+                } else {
+                    this.style.background="SteelBlue";
+                    this.innerText = "From Top"
+                }
+            })
         })
     }
     createStartPanel(parent){
@@ -162,11 +190,12 @@ class InstaBot {
             text:"Start Instabot",
             bgc: "orange",
             parent,
-        })
-        btn.addEventListener('click',function(){
-            self.init();
-            self.createStopBtn(parent);
-            this.parentNode.removeChild(this); return this;
+        },b=>{
+            b.addEventListener('click',function(){
+                self.init();
+                self.createStopBtn(parent);
+                this.parentNode.removeChild(this); return this;
+            })
         })
     }
     createStopBtn(parent){
@@ -175,11 +204,12 @@ class InstaBot {
             text:"Stop",
             bgc: "tomato",
             parent,
-        })
-        btn.addEventListener('click',function(){
-            self.stop();
-            self.createStartPanel(parent);
-            this.parentNode.removeChild(this); return this;
+        },b=>{
+            b.addEventListener('click',function(){
+                self.stop();
+                self.createStartPanel(parent);
+                this.parentNode.removeChild(this); return this;
+            })
         })
     }
     init(){
@@ -462,7 +492,7 @@ class InstaBot {
         return c[ Math.floor(Math.random()*c.length) ]
     }
     submitComment(comment){
-         const delay = (Math.random()+0.3)*this.time.delayInitial;
+         const delay = (Math.random()+0.5)*this.time.delayInitial;
          const btn = document.querySelector(this.element.commentPostBtn);
          return new Promise(resolve=>{
              this.waitFor(delay,()=>{
