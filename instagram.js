@@ -333,9 +333,10 @@ class InstaBot {
         this.waitFor(delay, ()=>{
             const { personName, personLink } = this.getName() || {};
             const numberOfLikes = this.getNumberOfLikes();
+            const isImage = document.querySelector(this.element.image)?document.querySelector(this.element.image):false;
             console.log(`%c Analyzing %c${personName}`,'color:dodgerblue;font-weight:bold;','background:GoldenRod;color:white!important;text-decoration:underline;');
             console.log(`%c${personLink}`,'font-size:8px;');
-            if( personName != null 
+            if( personName != null && isImage
                 && ((numberOfLikes >= this.conditions.minLikes && numberOfLikes <= this.conditions.maxLikes && this.conditions.isFiltering) 
                 || !this.conditions.isFiltering) 
             ){
