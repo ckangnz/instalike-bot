@@ -106,9 +106,11 @@ class InstaBot {
         right.style="position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;"
         document.body.appendChild(left);
         document.body.appendChild(right);
+        this.createLikeAllBtn(right);
         this.createStartBtn(right);
+
         this.createStatusBtn(left);
-        this.createLikeAllBtn(left);
+        this.createFilterUnfollowersBtn(left);
         this.createToggleIncludeTop(left);
         this.createToggleFilter(left);
     }
@@ -181,6 +183,16 @@ class InstaBot {
                     this.style.background="SteelBlue";
                     this.innerText = "From Top"
                 }
+            })
+        })
+    }
+    createFilterUnfollowersBtn(parent){
+        const self = this;
+        const btn = this.createBtn({
+            text:"Show unfollowers", bgc: "teal", parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                self.showWhoUnfollowedMe();
             })
         })
     }
