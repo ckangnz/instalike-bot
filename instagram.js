@@ -51,6 +51,7 @@ class InstaBot {
         this.actions = {
             likes: 0, // How many I liked
             follows:[], //People I followed
+            archiveFollowed:[],
             stopped: false,
         };
         this.element = {
@@ -93,7 +94,12 @@ class InstaBot {
         }
         console.log(`%cResults`,'font-size:10px;font-weight:bold;')
         console.log(`%c Current liked : ${this.actions.likes}`,'font-size:8px;')
-        console.log(`%c Current follows : ${this.actions.follows.length}`,'font-size:8px;')
+        console.log(`%c Current follows : ${this.actions.archiveFollowed.length + this.actions.follows.length}`,'font-size:8px;')
+        if(this.actions.archiveFollowed.length>0){
+            this.actions.archiveFollowed.forEach((f)=>{
+                console.log(`%c${f.personName}: ${f.personLink}`, "font-weight:bold; font-size:8px;");
+            })
+        }
         if(this.actions.follows.length>0){
             this.actions.follows.forEach((f)=>{
                 console.log(`%c${f.personName}: ${f.personLink}`, "font-weight:bold; font-size:8px;");
@@ -256,6 +262,7 @@ class InstaBot {
         }
         if(this.actions.follows.length > 0){
             console.log(`Resetting followers from ${this.actions.likes} to 0`)
+            this.actions.archiveFollowed = [ ...this.actions.follows, ...this.actions.archiveFollowed ];
             this.actions.follows = [];
         }
         const post = (this.conditions.includeTop)?document.querySelector(this.element.post):document.querySelector(this.element.recentPost)
