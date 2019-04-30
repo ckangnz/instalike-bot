@@ -44,7 +44,7 @@ class InstaBot {
                     '선팔하구 가요! 맞팔해요','선팔했어요! 맞팔해용','선팔합니다~ 맞팔해주시꺼죠?',
                     '맞팔해요','맞팔해주세요','맞팔할까요'
                 ],
-                likeback: ['좋반요!','좋아요반사요!','좋반이요','좋반 맞팔해요~~']
+                likeback: ['좋반요!','좋아요반사요!','좋반이요','좋아요 반사왔어요~~']
             },
             emoji: [ '😊','😛','🤗','😄','🤙','👍','🙌','🙏', ]
         }
@@ -400,33 +400,31 @@ class InstaBot {
     }
     goToNextImage(){
         const delay = (Math.random()+0.4)* this.time.delayNext;
-        this.waitFor(delay, ()=>{
-            const el = document.querySelector(this.element.nextBtn);
-
-            if(this.actions.likes >= this.conditions.maxLiked) { 
-                console.log(`%cYou have already liked ${this.conditions.maxLiked} images. Restarting will reset`,'font-weight:bold;font-size:8px;');
-                this.stop();
-            }  
-
-            el ? el.click() : true;
-            if(performance.now() - this.time.start < this.time.maxDuration && !this.actions.stopped){
-                console.log(`%cAvailable likes Remaining: ${this.conditions.maxLiked - this.actions.likes}`,'color:gray;font-size:6px;font-style:italic');
-                console.log(`%cFollowed: ${this.actions.follows.length}`,'color:gray;font-size:6px;font-style:italic');
-                console.log(`%cTime remaining: ${ Math.round((this.time.maxDuration - (performance.now() - this.time.start))/this.min*10)/10} minutes`,'color:gray;font-size:6px;font-style:italic');
+        const el = document.querySelector(this.element.nextBtn);
+        if(this.actions.likes >= this.conditions.maxLiked) { 
+            console.log(`%cYou have already liked ${this.conditions.maxLiked} images. Restarting will reset`,'font-weight:bold;font-size:8px;');
+            this.stop();
+        }  
+        if(performance.now() - this.time.start < this.time.maxDuration && !this.actions.stopped){
+            console.log(`%cAvailable likes Remaining: ${this.conditions.maxLiked - this.actions.likes}`,'color:gray;font-size:6px;font-style:italic');
+            console.log(`%cFollowed: ${this.actions.follows.length}`,'color:gray;font-size:6px;font-style:italic');
+            console.log(`%cTime remaining: ${ Math.round((this.time.maxDuration - (performance.now() - this.time.start))/this.min*10)/10} minutes`,'color:gray;font-size:6px;font-style:italic');
+            this.waitFor(delay, ()=>{
+                el ? el.click() : true;
                 this.processPost();
+            });
+        }
+        else{
+            console.log(`%c=======================`,'color:white;');
+            console.log("%cAll done here...",'font-weight:bold; font-size:14px;color:green;');
+            console.log(`%cTotal Like count: ${this.actions.likes} images`, "font-weight:bold; font-size:12px;");
+            if(this.actions.follows.length>0){
+                console.log(`%cTotal Follow count: ${this.actions.follows.length}`, "font-weight:bold; font-size:12px;");
+                this.actions.follows.forEach((f)=>{
+                    console.log(`%c${f.personName}: ${f.personLink}`, "font-weight:bold; font-size:8px;");
+                })
             }
-            else{
-                console.log(`%c=======================`,'color:white;');
-                console.log("%cAll done here...",'font-weight:bold; font-size:14px;color:green;');
-                console.log(`%cTotal Like count: ${this.actions.likes} images`, "font-weight:bold; font-size:12px;");
-                if(this.actions.follows.length>0){
-                    console.log(`%cTotal Follow count: ${this.actions.follows.length}`, "font-weight:bold; font-size:12px;");
-                    this.actions.follows.forEach((f)=>{
-                        console.log(`%c${f.personName}: ${f.personLink}`, "font-weight:bold; font-size:8px;");
-                    })
-                }
-            }
-        });
+        }
     }
     async showWhoUnfollowedMe(){
         const following = await this.loadFollowers(true);
@@ -483,35 +481,41 @@ class InstaBot {
         const f4fcom = this.comments.comments.followback;
         const l4lcom = this.comments.comments.likeback;
         const notFollowed = document.querySelector(this.element.followBtn);
-        const isSafeImage = this.checkImageAlt();
-
-        if(this.conditions.isFiltering 
+        const isSafeToFollow = hasF4F && this.checkImageAlt();
+        if(
+            this.conditions.isFiltering 
             && notFollowed 
-            && ((hasF4F && isSafeImage ) || hasL4L)
+            && (isSafeToFollow || hasL4L)
         ){
             const input = document.querySelector('.Ypffh'); 
-            const lastValue = input.value;
-            const generatedComment = 
-                (hasF4F && this.conditions.isFollowing)
-                ? this.generateRandomComment(f4fcom)
-                :(hasL4L)
-                ? this.generateRandomComment(l4lcom)
-                :null;
-            const generateEmoji = this.generateRandomComment(this.comments.emoji)
-            input.value = generatedComment + generateEmoji;
-            const event = new Event('change', { bubbles: true });
-            event.simulated = true;
-            const tracker = input._valueTracker;
-            if (tracker) {
-                tracker.setValue(lastValue);
+            if(input){
+                const lastValue = input.value;
+                const generatedComment = 
+                    (hasF4F && this.conditions.isFollowing)
+                    ? this.generateRandomComment(f4fcom)
+                    :(hasL4L)
+                    ? this.generateRandomComment(l4lcom)
+                    :null;
+                const generateEmoji = this.generateRandomComment(this.comments.emoji)
+                input.value = generatedComment + generateEmoji;
+                const event = new Event('change', { bubbles: true });
+                event.simulated = true;
+                const tracker = input._valueTracker;
+                if (tracker) {
+                    tracker.setValue(lastValue);
+                }
+                input.dispatchEvent(event);
+                if(generatedComment != null){
+                    const submittedComment = await this.submitComment(generatedComment);
+                    (submittedComment && this.conditions.isFollowing)
+                        ? await this.follow(hasF4F)
+                        : console.log(`%cNot following because couldn't comment...`)
+                } 
+            } else {
+                console.log(`%cComment Disabled!`,'font-size:8px;');
             }
-            input.dispatchEvent(event);
-            if(generatedComment != null){
-                const submittedComment = await this.submitComment(generatedComment);
-                (submittedComment)
-                    ? await this.follow(hasF4F)
-                    : console.log(`%cNot following because couldn't comment...`)
-            } 
+        } else if (isSafeToFollow) {
+            console.log(`%cComment skipped!.`,'font-size:8px; color:red!important;');
         } else if(!notFollowed) {
             console.log(`%cAlready followed. Not leaving comments.`,'font-size:8px; color:red!important;');
         }
@@ -522,9 +526,9 @@ class InstaBot {
          return new Promise(resolve=>{
              if(btn){
                  btn.click()
+                 console.log(`%cPosted comment: "${comment}"`, 'font-weight:bold; font-style:italic; ')
+                 console.log(`%c${window.location.href}`, 'font-size:8px;font-style:italic;')
                  this.waitFor(delay,()=>{
-                     console.log(`%cPosted comment: "${comment}"`, 'font-weight:bold; font-style:italic; ')
-                     console.log(`%c${window.location.href}`, 'font-size:8px;font-style:italic;')
                      resolve(true);
                  })
              } else {
@@ -536,11 +540,9 @@ class InstaBot {
         return new Promise(resolve=>{
             if(hasF4F && this.conditions.isFiltering && this.conditions.isFollowing){
                 const likes = this.getNumberOfLikes();
-                const isSafeImage = this.checkImageAlt();
                 if(
                     likes >= this.conditions.minLikes && likes <= this.conditions.maxLikes 
                     && this.actions.follows.length < this.conditions.maxFollows
-                    && isSafeImage 
                 ){
                     const person = this.getName();
                     const followBtn = document.querySelector(this.element.followBtn)
@@ -551,9 +553,7 @@ class InstaBot {
                         resolve(true);
                     }
                 } else {
-                    if(!isSafeImage){
-                        console.log('%c Poor image to follow', 'font-size:8px;font-weight:bold;');
-                    } else if(this.actions.follows.length >= this.conditions.maxFollows){
+                    if(this.actions.follows.length >= this.conditions.maxFollows){
                         console.log('%c FOLLOW LIMIT EXCEEDED', 'font-size:8px;font-weight:bold;');
                     }
                     resolve(false);
@@ -593,3 +593,4 @@ class InstaBot {
     }
 }
 const instabot = new InstaBot();
+clear();
