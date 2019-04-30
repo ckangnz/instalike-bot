@@ -12,6 +12,7 @@ class InstaBot {
             maxDuration: 10 * this.min, // Max runtime before the script stops liking
         };
         this.conditions = {
+            includeTop: true,
             maxFollows: 15,
             maxLiked: 80,
             minLikes: 20,
@@ -106,6 +107,7 @@ class InstaBot {
         document.body.appendChild(left);
         document.body.appendChild(right);
         this.createStartPanel(right);
+        this.createToggleIncludeTop(left);
         this.createToggleFilter(left);
     }
     createBtn({text, bgc, parent}){
@@ -123,8 +125,7 @@ class InstaBot {
             bgc: "SteelBlue",
             parent,
         })
-        btn.addEventListener('click',function(e){
-            e.stopPropagation();
+        btn.addEventListener('click',function(){
             self.toggleFilter();
             this.classList.toggle('deactivated');
             if(this.className == 'deactivated'){
@@ -136,6 +137,25 @@ class InstaBot {
             }
         })
     }
+    createToggleIncludeTop(parent){
+        const self = this;
+        const btn = this.createBtn({
+            text:"From Top",
+            bgc: "SteelBlue",
+            parent,
+        })
+        btn.addEventListener('click',function(){
+            self.toggleIncludeTop();
+            this.classList.toggle('deactivated');
+            if(this.className == 'deactivated'){
+                this.style.background = 'tomato';
+                this.innerText = "From Recent"
+            } else {
+                this.style.background="SteelBlue";
+                this.innerText = "From Top"
+            }
+        })
+    }
     createStartPanel(parent){
         const self = this;
         const btn = this.createBtn({
@@ -143,8 +163,7 @@ class InstaBot {
             bgc: "orange",
             parent,
         })
-        btn.addEventListener('click',function(e){
-            e.stopPropagation();
+        btn.addEventListener('click',function(){
             self.init();
             self.createStopBtn(parent);
             this.parentNode.removeChild(this); return this;
@@ -157,14 +176,13 @@ class InstaBot {
             bgc: "tomato",
             parent,
         })
-        btn.addEventListener('click',function(e){
-            e.stopPropagation();
+        btn.addEventListener('click',function(){
             self.stop();
             self.createStartPanel(parent);
             this.parentNode.removeChild(this); return this;
         })
     }
-    init(includeTop = true){
+    init(){
         this.actions.stopped = false;
         this.time.start = performance.now();
         if(this.actions.likes > 0){
@@ -175,8 +193,8 @@ class InstaBot {
             console.log(`Resetting followers from ${this.actions.likes} to 0`)
             this.actions.follows = [];
         }
-        const post = (includeTop)?document.querySelector(this.element.post):document.querySelector(this.element.recentPost)
-        post.click(); // Click first image from Top Posts
+        const post = (this.conditions.includeTop)?document.querySelector(this.element.post):document.querySelector(this.element.recentPost)
+        post.click();
 
         const delay = (Math.random()+0.3)*this.time.delayInitial;
         this.waitFor(delay,()=>{
@@ -320,6 +338,7 @@ class InstaBot {
             el ? el.click() : true;
             if(performance.now() - this.time.start < this.time.maxDuration && !this.actions.stopped){
                 console.log(`%cAvailable likes Remaining: ${this.conditions.maxLiked - this.actions.likes}`,'color:gray;font-size:6px;font-style:italic');
+                console.log(`%cFollowed: ${this.actions.follows.length}`,'color:gray;font-size:6px;font-style:italic');
                 console.log(`%cTime remaining: ${ Math.round((this.time.maxDuration - (performance.now() - this.time.start))/this.min*10)/10} minutes`,'color:gray;font-size:6px;font-style:italic');
                 this.processPost();
             }
@@ -442,13 +461,15 @@ class InstaBot {
     generateRandomComment(c){
         return c[ Math.floor(Math.random()*c.length) ]
     }
-     submitComment(comment){
+    submitComment(comment){
          const delay = (Math.random()+0.3)*this.time.delayInitial;
          const btn = document.querySelector(this.element.commentPostBtn);
          return new Promise(resolve=>{
              this.waitFor(delay,()=>{
-                 console.log(`%c Commented : "${comment}"`, 'font-weight:bold; font-style:italic; ')
-                 resolve(btn.click());
+                 console.log(`%cPosted comment: "${comment}"`, 'font-weight:bold; font-style:italic; ')
+                 console.log(`%c${window.location.href}`, 'font-size:8px;font-style:italic;')
+                 btn.click()
+                 resolve(true);
              })
          })
     }
@@ -456,6 +477,12 @@ class InstaBot {
         document.querySelectorAll(this.element.likeBtn).forEach((b)=>{
             b.click()
         })
+    }
+    toggleIncludeTop(){
+        this.conditions.includeTop = !this.conditions.includeTop;
+        this.conditions.includeTop
+            ? console.log(`%c Start from Top`, 'background:green;color:white!important;')
+            : console.log(`%c Start from Recent`, 'background:red;color:white!important;')
     }
     toggleFilter(){
         this.conditions.isFiltering = !this.conditions.isFiltering;
