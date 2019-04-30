@@ -299,19 +299,21 @@ class InstaBot {
         return isSafe;
     }
     likePost(){
+        const delay = (Math.random()+0.3)*this.time.delayInitial;
         const likebtn = document.querySelector(this.element.likeBtn);
-        if(likebtn){
-            likebtn.click();
-            this.actions.likes++
-            console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
-        } else {
-            console.log(`%cAlready liked.`,'font-size:8px; color:red!important;');
-        }
-        this.goToNextImage();
+        this.waitFor(delay,()=>{
+            if(likebtn){
+                likebtn.click();
+                this.actions.likes++
+                console.log(`%cLike count:  ${this.actions.likes}`, "font-weight:bold; font-style:italic; ");
+            } else {
+                console.log(`%cAlready liked.`,'font-size:8px; color:red!important;');
+            }
+        })
     }
     processPost(){
         console.log(`%c=======================`,'color:white;');
-        const delay = (Math.random()+0.3)*this.time.delayLike;
+        const delay = (Math.random()+0.3)*this.time.delayInitial;
         this.waitFor(delay, ()=>{
             const { personName, personLink } = this.getName() || {};
             const numberOfLikes = this.getNumberOfLikes();
@@ -332,8 +334,9 @@ class InstaBot {
                         console.log(`%cFound matching ${tags.hasTag.length} tags:`,'font-size:8px; color:lightgray!important;', tags.hasTag.join(','));
                         console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray!important;');
                     }
-                    this.likePost();
                     (this.conditions.isFiltering)?this.writeComment(tags):false;
+                    this.likePost();
+                    this.goToNextImage();
                 } else {
                     if(tags.hasExcludes.length > 0){
                         console.log(`%cFound unwanted tags:`,'font-size:8px; color:lightgray!important;', tags.hasExcludes.join(','));
