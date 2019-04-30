@@ -303,12 +303,16 @@ class InstaBot {
         }
     }
     checkImageAlt(){
-        const alt = document.querySelector(this.element.imageAlt).alt;
-        const isSafe = this.conditions.imageAlt.some((v)=> {
-            return alt.indexOf(v) >= 0;
-        });
-        if(isSafe) console.log(`%c ${alt}`, 'font-size:8px;');
-        return isSafe;
+        const alt = document.querySelector(this.element.image)?document.querySelector(this.element.image).alt:null
+        if(alt!=null){
+            const isSafe = this.conditions.imageAlt.some((v)=> {
+                return alt.indexOf(v) >= 0;
+            });
+            if(isSafe) console.log(`%c ${alt}`, 'font-size:8px;');
+            return isSafe;
+        } else {
+            return false;
+        }
     }
     likePost(){
         const delay = (Math.random()+0.3)*this.time.delayInitial;
