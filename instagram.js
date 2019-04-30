@@ -106,7 +106,7 @@ class InstaBot {
         right.style="position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;"
         document.body.appendChild(left);
         document.body.appendChild(right);
-        this.createStartPanel(right);
+        this.createStartBtn(right);
         this.createStatusBtn(left);
         this.createLikeAllBtn(left);
         this.createToggleIncludeTop(left);
@@ -184,7 +184,7 @@ class InstaBot {
             })
         })
     }
-    createStartPanel(parent){
+    createStartBtn(parent){
         const self = this;
         const btn = this.createBtn({
             text:"Start Instabot",
@@ -207,7 +207,7 @@ class InstaBot {
         },b=>{
             b.addEventListener('click',function(){
                 self.stop();
-                self.createStartPanel(parent);
+                self.createStartBtn(parent);
                 this.parentNode.removeChild(this); return this;
             })
         })
@@ -291,7 +291,7 @@ class InstaBot {
         }
     }
     checkImageAlt(){
-        const alt = document.querySelector(this.element.image).alt;
+        const alt = document.querySelector(this.element.imageAlt).alt;
         const isSafe = this.conditions.imageAlt.some((v)=> {
             return alt.indexOf(v) >= 0;
         });
