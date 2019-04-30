@@ -12,6 +12,7 @@ class InstaBot {
             maxDuration: 10 * this.min, // Max runtime before the script stops liking
         };
         this.conditions = {
+            isFollowing : true,
             includeTop: true,
             maxFollows: 15,
             maxLiked: 80,
@@ -106,12 +107,14 @@ class InstaBot {
         right.style="position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;"
         document.body.appendChild(left);
         document.body.appendChild(right);
+
+        this.createStatusBtn(right);
+        this.createFilterUnfollowersBtn(right);
         this.createLikeAllBtn(right);
         this.createStartBtn(right);
 
-        this.createStatusBtn(left);
-        this.createFilterUnfollowersBtn(left);
         this.createToggleIncludeTop(left);
+        this.createToggleIsFollowingBtn(left);
         this.createToggleFilter(left);
     }
     createBtn({text, bgc, parent}, cb){
@@ -143,6 +146,26 @@ class InstaBot {
         },b=>{
             b.addEventListener('click',function(){
                 self.likeAllOnMyFeed();
+            })
+        })
+    }
+    createToggleIsFollowingBtn(parent){
+        const self = this;
+        const btn = this.createBtn({
+            text:"Following ON",
+            bgc: "SteelBlue",
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                self.toggleIsFollowing();
+                this.classList.toggle('deactivated');
+                if(this.className == 'deactivated'){
+                    this.style.background = 'tomato';
+                    this.innerText = "Following OFF"
+                } else {
+                    this.style.background="SteelBlue";
+                    this.innerText = "Following ON"
+                }
             })
         })
     }
@@ -460,15 +483,16 @@ class InstaBot {
         const f4fcom = this.comments.comments.followback;
         const l4lcom = this.comments.comments.likeback;
         const notFollowed = document.querySelector(this.element.followBtn);
+        const isSafeImage = this.checkImageAlt();
 
         if(this.conditions.isFiltering 
             && notFollowed 
-            && (hasF4F || hasL4L)
+            && ((hasF4F && isSafeImage ) || hasL4L)
         ){
             const input = document.querySelector('.Ypffh'); 
             const lastValue = input.value;
             const generatedComment = 
-                (hasF4F)
+                (hasF4F && this.conditions.isFollowing)
                 ? this.generateRandomComment(f4fcom)
                 :(hasL4L)
                 ? this.generateRandomComment(l4lcom)
@@ -482,8 +506,9 @@ class InstaBot {
                 tracker.setValue(lastValue);
             }
             input.dispatchEvent(event);
-            if(input.value!=null){
-                (await this.submitComment(generatedComment))
+            if(generatedComment != null){
+                const submittedComment = await this.submitComment(generatedComment);
+                (submittedComment)
                     ? await this.follow(hasF4F)
                     : console.log(`%cNot following because couldn't comment...`)
             } 
@@ -509,7 +534,7 @@ class InstaBot {
     }
     follow(hasF4F){
         return new Promise(resolve=>{
-            if(hasF4F && this.conditions.isFiltering){
+            if(hasF4F && this.conditions.isFiltering && this.conditions.isFollowing){
                 const likes = this.getNumberOfLikes();
                 const isSafeImage = this.checkImageAlt();
                 if(
@@ -540,6 +565,12 @@ class InstaBot {
         document.querySelectorAll(this.element.likeBtn).forEach((b)=>{
             b.click()
         })
+    }
+    toggleIsFollowing(){
+        this.conditions.isFollowing = !this.conditions.isFollowing;
+        this.conditions.isFollowing
+            ? console.log(`%c Following ON`, 'background:green;color:white!important;')
+            : console.log(`%c Following OFF`, 'background:red;color:white!important;')
     }
     toggleIncludeTop(){
         this.conditions.includeTop = !this.conditions.includeTop;
