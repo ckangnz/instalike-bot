@@ -435,43 +435,15 @@ class InstaBot {
             })
         })
     }
-    follow(hasF4F){
-        if(hasF4F && this.conditions.isFiltering){
-            const likes = this.getNumberOfLikes();
-            const isSafeImage = this.checkImageAlt();
-            if(
-                likes >= this.conditions.minLikes && likes <= this.conditions.maxLikes 
-                && this.actions.follows.length < this.conditions.maxFollows
-                && isSafeImage 
-            ){
-                const person = this.getName();
-                const followBtn = document.querySelector(this.element.followBtn)
-                if(followBtn){
-                    followBtn.click();
-                    this.actions.follows.push(person);
-                    console.log(`%cFollowed: ${person.personLink}`, "font-weight:bold; font-style:italic; ");
-                    return true;
-                }
-            } else {
-                if(!isSafeImage){
-                    console.log('%c Poor image to follow', 'font-size:8px;font-weight:bold;');
-                } else if(this.actions.follows.length >= this.conditions.maxFollows){
-                    console.log('%c FOLLOW LIMIT EXCEEDED', 'font-size:8px;font-weight:bold;');
-                }
-                return false;
-            }
-        }
-    }
+    generateRandomComment(c){ return c[Math.floor(Math.random()*c.length)] }
     async writeComment({ hasF4F, hasL4L }){
         const f4fcom = this.comments.comments.followback;
         const l4lcom = this.comments.comments.likeback;
-        const followed = this.follow(hasF4F);
-
         if(this.conditions.isFiltering && (hasF4F || hasL4L)){
             const input = document.querySelector('.Ypffh'); 
             const lastValue = input.value;
             const generatedComment = 
-                (hasF4F && followed)
+                (hasF4F)
                 ? this.generateRandomComment(f4fcom)
                 :(hasL4L)
                 ? this.generateRandomComment(l4lcom)
@@ -485,11 +457,10 @@ class InstaBot {
                 tracker.setValue(lastValue);
             }
             input.dispatchEvent(event);
-            (input.value!=null)? await this.submitComment(generatedComment): false;
+            (input.value!=null)
+                ? await this.submitComment(generatedComment) && await this.follow(hasF4F)
+                : false
         }
-    }
-    generateRandomComment(c){
-        return c[ Math.floor(Math.random()*c.length) ]
     }
     submitComment(comment){
          const delay = (Math.random()+0.5)*this.time.delayInitial;
@@ -502,6 +473,35 @@ class InstaBot {
                  resolve(true);
              })
          })
+    }
+    follow(hasF4F){
+        return new Promise(resolve=>{
+            if(hasF4F && this.conditions.isFiltering){
+                const likes = this.getNumberOfLikes();
+                const isSafeImage = this.checkImageAlt();
+                if(
+                    likes >= this.conditions.minLikes && likes <= this.conditions.maxLikes 
+                    && this.actions.follows.length < this.conditions.maxFollows
+                    && isSafeImage 
+                ){
+                    const person = this.getName();
+                    const followBtn = document.querySelector(this.element.followBtn)
+                    if(followBtn){
+                        followBtn.click();
+                        this.actions.follows.push(person);
+                        console.log(`%cFollowed: ${person.personLink}`, "font-weight:bold; font-style:italic; ");
+                        resolve(true);
+                    }
+                } else {
+                    if(!isSafeImage){
+                        console.log('%c Poor image to follow', 'font-size:8px;font-weight:bold;');
+                    } else if(this.actions.follows.length >= this.conditions.maxFollows){
+                        console.log('%c FOLLOW LIMIT EXCEEDED', 'font-size:8px;font-weight:bold;');
+                    }
+                    resolve(false);
+                }
+            }
+        })
     }
     likeAllOnMyFeed(){
         document.querySelectorAll(this.element.likeBtn).forEach((b)=>{
