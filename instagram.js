@@ -470,7 +470,7 @@ class InstaBot {
         }
     }
     submitComment(comment){
-         const delay = (Math.random()+0.5)*this.time.delayInitial;
+        const delay = (Math.random()+0.5)*this.time.delayComment;
          const btn = document.querySelector(this.element.commentPostBtn);
          return new Promise(resolve=>{
              this.waitFor(delay,()=>{
