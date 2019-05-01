@@ -282,18 +282,18 @@ class InstaBot {
                 personLink : document.querySelector(this.element.name).href,
             }
             : console.log(`%cCouldn't load name. Retrying...`,'font-size:8px; color:red!important;') 
-            && setTimeout(()=>document.querySelector(this.element.name) != null 
+            && this.waitFor(delay,()=>document.querySelector(this.element.name) != null 
                 ? {
                     personName : document.querySelector(this.element.name).innerText,
                     personLink : document.querySelector(this.element.name).href,
                 }
                 : null
-                ,delay);
+            );
     }
     getNumberOfLikes(){
         return document.querySelector(this.element.numberOfLikes) != null
             ? parseInt(document.querySelector(this.element.numberOfLikes).innerText.replace(',','')) 
-            :100;
+            :0;
     }
     checkTags(){
         const tags = document.querySelectorAll(this.element.tags);
@@ -347,9 +347,9 @@ class InstaBot {
         }
     }
     likePost(){
-        const delay = (Math.random()+0.3)*this.time.delayInitial;
-        const likebtn = document.querySelector(this.element.likeBtn);
+        const delay = (Math.random()+0.3)*this.time.delayLike;
         this.waitFor(delay,()=>{
+            const likebtn = document.querySelector(this.element.likeBtn);
             if(likebtn){
                 likebtn.click();
                 this.actions.likes++
@@ -359,54 +359,58 @@ class InstaBot {
             }
         })
     }
-    processPost(){
-        console.log(`%c=======================`,'color:white;');
-        const delay = (Math.random()+0.3)*this.time.delayInitial;
-        this.waitFor(delay, ()=>{
-            const { personName, personLink } = this.getName() || {};
-            const numberOfLikes = this.getNumberOfLikes();
-            const isImage = document.querySelector(this.element.image)?document.querySelector(this.element.image):false;
-            console.log(`%c Analyzing %c${personName}`,'color:dodgerblue;font-weight:bold;','background:GoldenRod;color:white!important;text-decoration:underline;');
-            console.log(`%c${personLink}`,'font-size:8px;');
-            if( personName != null && isImage
-                && ((numberOfLikes >= this.conditions.minLikes && numberOfLikes <= this.conditions.maxLikes && this.conditions.isFiltering) 
-                || !this.conditions.isFiltering) 
-            ){
-                const extraReply = document.querySelectorAll(this.element.extraReply); extraReply? extraReply.forEach((t)=>t.click()):true;
-                const reply = document.querySelectorAll(this.element.reply); reply ? reply.forEach((t)=>t.click()):true;
-                const tags = this.checkTags();
-
-                if(( tags.hasTag.length > 0 && tags.hasExcludes == 0 && this.conditions.isFiltering ) || !this.conditions.isFiltering){
-                    if(!this.conditions.isFiltering){
-                        console.log(`%c Not Filtering:`,'font-size:8px; color:lightgray!important;');
-                    } else {
-                        console.log(`%cFound matching ${tags.hasTag.length} tags:`,'font-size:8px; color:lightgray!important;', tags.hasTag.join(','));
-                        console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray!important;');
-                    }
-                    (this.conditions.isFiltering)?this.writeComment(tags):false;
-                    this.likePost();
-                    this.goToNextImage();
-                } else {
-                    if(tags.hasExcludes.length > 0){
-                        console.log(`%cFound unwanted tags:`,'font-size:8px; color:lightgray!important;', tags.hasExcludes.join(','));
-                    } else {
-                        console.log(`%cNo Matching tags.`,'font-size:8px; color:red!important;');
-                    }
-                    this.goToNextImage();
-                }
-            } else {
-                if(personName == null) {
-                    console.log(`%c Couldn't load the person`, 'font-size:8px; color:red!important;');
-                } else {
-                    (numberOfLikes <= this.conditions.minLikes)
-                        ?console.log(`%c Too little likes`, 'font-size:8px; color:red!important;'):null;
-                    (numberOfLikes >= this.conditions.maxLikes) 
-                        ?console.log(`%c Too many likes`, 'font-size:8px; color:red!important;'):null;
-                }
-                this.goToNextImage();
-            }
-        });
+    openHiddenComments(){
+        const extraReply = document.querySelectorAll(this.element.extraReply); extraReply? extraReply.forEach((t)=>t.click()):true;
+        const reply = document.querySelectorAll(this.element.reply); reply ? reply.forEach((t)=>t.click()):true;
     }
+     processPost(){
+         const delay = (Math.random()+0.3)*this.time.delayInitial;
+         this.waitFor(delay,()=>{
+             console.log(`%c=======================`,'color:white;');
+             const { personName, personLink } = this.getName() || {};
+             const isImage = document.querySelector(this.element.image)?document.querySelector(this.element.image):false;
+             (personName != null && personLink != null)
+                 ? console.log(`%c Analyzing %c${personName}`,'color:dodgerblue;font-weight:bold;','background:GoldenRod;color:white!important;text-decoration:underline;')
+                 && console.log(`%c${personLink}`,'font-size:8px;')
+                 :null;
+
+             if( personName != null && isImage){
+                 const numberOfLikes = this.getNumberOfLikes();
+
+                 if(( numberOfLikes >= this.conditions.minLikes && numberOfLikes <= this.conditions.maxLikes && this.conditions.isFiltering) 
+                     || !this.conditions.isFiltering) {
+                     this.openHiddenComments();
+                     const tags = this.checkTags();
+
+                     if(( tags.hasTag.length > 0 && tags.hasExcludes == 0 && this.conditions.isFiltering ) || !this.conditions.isFiltering){
+                         if(this.conditions.isFiltering){
+                             console.log(`%cFound matching ${tags.hasTag.length} tags:`,'font-size:8px; color:lightgray!important;', tags.hasTag.join(','));
+                             console.log(`%cThis person has ${numberOfLikes} likes.`,'font-size:8px; color:lightgray!important;');
+                         } else {
+                             console.log(`%c Not Filtering:`,'font-size:8px; color:lightgray!important;');
+                         }
+                         (this.conditions.isFiltering)?this.writeComment(tags):false;
+                         this.likePost();
+                     } else {
+                         if(tags.hasExcludes.length > 0){
+                             console.log(`%cFound unwanted tags:`,'font-size:8px; color:lightgray!important;', tags.hasExcludes.join(','));
+                         } else {
+                             console.log(`%cNo Matching tags.`,'font-size:8px; color:red!important;');
+                         }
+                     }
+                 } else {
+                     (numberOfLikes <= this.conditions.minLikes)
+                         ?console.log(`%c Too little likes`, 'font-size:8px; color:red!important;'):null;
+                     (numberOfLikes >= this.conditions.maxLikes) 
+                         ?console.log(`%c Too many likes`, 'font-size:8px; color:red!important;'):null;
+                 }
+             } else {
+                 (personName == null)?console.log(`%c Couldn't load the person`, 'font-size:8px; color:red!important;'):null;
+                 (!isImage)?console.log(`%cNot image`,'font-size:8px;'):null;
+             }
+             this.goToNextImage();
+         })
+     }
     goToNextImage(){
         const delay = (Math.random()+0.4)* this.time.delayNext;
         const el = document.querySelector(this.element.nextBtn);
