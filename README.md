@@ -1,41 +1,64 @@
 # Instagram Browser Bot
 
-##### *This bot requires Chrome*
+##### *This Instabot requires Chrome*
 
-This bot will automatically like instagram posts depending on these conditions:
+This Instabot will automatically like instagram posts depending on these conditions:
   * posts includes specified tags
   * posts doesn't include specified tags
-  * posts that has less likes than specified number
+  * posts that has less likes than specified maximum likes
+  * posts that has more likes than specified minimum likes
+  * you have not liked this post before
+  * you are not following the user
 
-To Do: I'm going to build this bot to be a chrome's extension tool so you get an UI to change options.
+It will comment on posts depending on these conditions:
+  * posts includes specified tags for l4l or f4f
+  * posts has been successfully liked
+  * post has an image alt tag you specified
+  * you are not following the user
+
+It will Follow users on these conditions:
+  * you have successfully commented for f4f
+  * you are not following the user
+
+The Instabot will NOT do these if Filtering is turned off:
+  * commenting
+  * following
+  * checking min/max likes
+  * checking if the user is followed
 
 ---
 ### Instruction
-
   1. Copy this script to your favourite IDE (sublime, notepad, vim etc.)
-  2. Customize it to your need (I don't recommend changing delay times)
-  3. Copy the script
-  4. Visit www.instagram.com/explore/tags/(whatever tag you want)
-  5. Open console on chrome
+  2. Customize `this.conditions` and `this.comments` to your need (I don't recommend changing delay times)
+  3. Copy the entire script
+  4. Visit www.instagram.com and search for any tags (url should say www.instagram.com/explore/tags/your-desired-tag)
+  5. Open console on chrome (You MUST enable developers mode)
     - Windows : `Ctrl` + `Alt` + `i`
     - Mac : `Cmd` + `option` + `i`
   6. Under Console, paste the script then `enter`
-  7. Type `instabot.init()` (from Top Post) or `instabot.init(false)` (from Most Recent)
-  8. Type `instabot.stop()` to stop.
+  7. Click Start Instabot OR press `'`
+  8. Press `'` to stop
+
+note: You can't click any buttons when instabot is in progress. Press `'` and wait until the last task is done.
 
 ---
 
-### Tips
-
-* To check your status, type `instabot.check()`
-* If you wish to force like all posts, type `instabot.toggleFilter()`
-* On your feed, run `instabot.likeAllOnMyFeed()` to like everyone's posts :D
-* On a profile page, run `instabot.showWhoUnfollowedMe()`. Wait, and you will see the list of people who are not following you back!
-
 ### Customize these in the scripts :
-```js
-this.time.maxDuration           // How long you wish to run bot for
-this.conditions.maxLikes        // Skip those who have too many likes
-this.include                    // Like those who has these tags
-this.exclude                    // Like those who doesn't have these tags
-```
+  | `this.conditions.` | Description                                     |
+  | :---------------   | :---------------------------------------------  |
+  | `maxFollows`       | Maximum follow until last initialised task ends |
+  | `maxLiked`         | Maximum likes until last initialised task ends  |
+  | `minLikes`         | Minimum likes required to like the post         |
+  | `maxLikes`         | Maximum likes required to like the post         |
+  | `imageAlt`         | Image Alt required to comment=>follow           |
+  | `include`          | Tags required to like post                      |
+  | `exclude`          | Tags required to NOT like post                  |
+
+  | `this.comments.`        | Description                                    |
+  | :---------------        | :--------------------------------------------- |
+  | `conditions.followback` | Tags required to comment f4f                   |
+  | `conditions.likeback`   | Tags required to comment l4l                   |
+  | `comments.followback`   | Random comments for f4f                        |
+  | `comments.likeback`     | Random comments for l4l                        |
+  | `emoji`                 | Random Emoji at the end of the comment         |
+
