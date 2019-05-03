@@ -346,7 +346,7 @@ class Instabot {
                 return resolve(false);
             } else {
                 this.logger(`ID: <a style="${this.font.link}" target="_blank" href="${person.personLink}">${person.personName}</a>`,this.font.heading)
-                this.logger(`Current post: <a style="${this.font.link}" target="_blank" href=${src}"">${src}</a>`,this.font.small)
+                this.logger(`Current post: <a style="${this.font.link}" target="_blank" href="${src}">${src}</a>`,this.font.small)
             }
 
             if(liked){
@@ -369,7 +369,7 @@ class Instabot {
                 this.logger(`Too many likes`, this.font.error)
                 return resolve(false);
             } else {
-                this.logger(`Passed like filter : ${this.options.minLikes} < ${numberOfLikes} < ${this.options.maxLikes}`,this.font.pass);
+                this.logger(`Passed like filter : ${this.conditions.minLikes} < ${numberOfLikes} < ${this.conditions.maxLikes}`,this.font.pass);
             } 
 
             if( tags.hasTag.length == 0 ){
