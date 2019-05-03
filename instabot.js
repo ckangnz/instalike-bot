@@ -284,7 +284,7 @@ class Instabot {
             const image = document.querySelector(this.element.image); 
             const src = image ? image.currentSrc : image ? image.src : null
             const alt = image ? image.alt : null
-            const isSafe = (alt!=null)
+            const isSafe = (alt!=null && this.conditions.imageAlt.length > 0)
                 ?  this.conditions.imageAlt.some((v)=> {
                     return alt.indexOf(v) >= 0;
                 })
@@ -534,34 +534,8 @@ class Instabot {
         })
     }
     getStatus(){
-        console.log(`%cStatus`,this.font.heading)
-        console.log(`%cDuration : ${this.time.maxDuration/this.min} min`,this.font.small)
-        console.log(`%cFiltering : ${this.options.isFiltering}`,this.font.small)
-        console.log(`%cFollwing : ${this.options.isFollowing}`,this.font.small)
-        if(this.options.isFiltering){
-            console.log(`%cLike limit ? : ${this.conditions.maxLiked}`,this.font.small)
-            console.log(`%cLikes max ? : ${this.conditions.maxLikes} likes`,this.font.small)
-            console.log(`%cLikes min ? : ${this.conditions.minLikes} likes`,this.font.small)
-            console.log(`%cLike if : ${this.conditions.include.join(',')}`,this.font.small)
-            console.log(`%cDon't like if : ${this.conditions.exclude.join(',')}`,this.font.small)
-            console.log(`%cComment if : ${this.comments.conditions.likeback.join(',') + this.comments.conditions.followback.join(',')}`,this.font.small)
-        } else {
-            console.log(`%cInstaBot will like anything but won't follow nor comment`,this.font.small)
-        }
-        console.log(`%cResults`,this.font.heading)
-        console.log(`%c Current liked : ${this.status.liked.length + this.status.archivedLiked.length}`,this.font.small)
-        console.log(`%c Current followed : ${this.status.followed.length + this.status.archivedFollowed.length}`,this.font.small)
         console.log(this.status);
-        if(this.status.archivedFollowed.length>0){
-            this.status.archivedFollowed.forEach((f)=>{
-                console.log(`%c${f.personName}: ${f.personLink}`,this.font.small);
-            })
-        }
-        if(this.status.followed.length>0){
-            this.status.followed.forEach((f)=>{
-                console.log(`%c${f.personName}: ${f.personLink}`,this.font.small);
-            })
-        }
+        return this.status;
     }
     async getUnfollowers(){
         const following = await this.loadFollowers(true);
@@ -646,13 +620,18 @@ class InstabotUI {
             popupInner: "overflow:scroll;width:100%;height:100%",
             popupClose: "position:fixed; right:2em; top:1em;border:none;border-radius:5px;color:white;background:black;",
             ul: "display:flex;flex-flow:row wrap;margin-top:40px;box-sizing:border-box;",
-            li: "display:flex;flex-flow:column;justify-content:space-between;width:25%;padding:1em;",
+            li: "display:flex;flex-flow:column;justify-content:space-between;width:25%;padding:1em;box-sizing:border-box;",
             person: "display:flex;justify-content:space-between;align-items:center;flex-flow:row;width:100%;margin-bottom:1em;",
             personImage : "width:50px; height:50px;border-radius:50%;",
             personFollowed: "color:teal;font-size:8px;",
             personNotFollowed: "color:tomato;font-size:8px;",
             postImage: "width:100%; height:auto;",
             postCommented: "font-size:8px;color:grey;",
+            heading:"font-size:25px;font-weight:bold;margin-bottom:1em;",
+            subheading:"font-size:15px;font-weight:bold;",
+            bold:"font-weight:bold;",
+            pass:'background:rgba(0,256,0,0.3);',
+            error:'background:rgba(256,0,0,0.3)',
             btn : {
                 blue : "background:dodgerblue;color:white;outline:none;border-radius:5px;border:none;padding:5px 10px;margin-top:5px;",
                 red : "background:tomato;color:white;outline:none;border-radius:5px;border:none;padding:5px 10px;margin-top:5px;",
@@ -806,7 +785,49 @@ class InstabotUI {
             parent,
         },b=>{
             b.addEventListener('click',function(){
-                self.instabot.getStatus();
+                const b = self.instabot;
+                const html = `
+                <div style="margin-top:30px;">
+                    <div style="padding:1em;">
+                        <h2 style="${self.style.heading}">Status</h2>
+                        <h3 style="${self.style.subheading}">Duration:</h3> 
+                        <p style="margin-bottom:5px;">${b.time.maxDuration/b.min} min</p>
+                        <h3 style="${self.style.subheading}">Filtering Mode:</h3>
+                        <p style="margin-bottom:5px;">${b.options.isFiltering}</p>
+                        <h3 style="${self.style.subheading}">Following Mode:</h3>
+                        <p style="margin-bottom:5px;">${b.options.isFollowing}</p>
+                        ${b.options.isFiltering 
+                        ? `
+                            <h3 style="${self.style.subheading}">Likes limit :</h3>
+                            <p style="margin-bottom:5px;">${b.conditions.maxLiked}</p>
+                            <h3 style="${self.style.subheading}">Likes max :</h3>
+                            <p style="margin-bottom:5px;">${b.conditions.maxLikes}</p>
+                            <h3 style="${self.style.subheading}">Likes min :</h3>
+                            <p style="margin-bottom:5px;">${b.conditions.minLikes}</p>
+                            <h3 style="${self.style.subheading}">Comment if :</h3>
+                            ${b.comments.conditions.likeback.join(',') + b.comments.conditions.followback.join(',')}
+                        `:`
+                            <p style="${self.style.error}">Instabot will like anything but won't follow nor comment</p>
+                        `}
+                        <h2 style="${self.style.heading}margin-top:2em;">Results</h2>
+                        <h3 style="${self.style.subheading}">Current liked:</h3>
+                        <p style="margin-bottom:5px;">${b.status.liked.length + b.status.archivedLiked.length}</p>
+                        <h3 style="${self.style.subheading}">Current followed:</h3>
+                        <p style="margin-bottom:5px;">${b.status.followed.length + b.status.archivedFollowed.length}</p>
+                        ${b.status.archivedFollowed.length>0
+                        ?`${b.status.archivedFollowed.foreach((f)=>{
+                            `<p><a href="${f.personLink}">${f.personName}</a></p>`
+                        })}`
+                        :``}
+                        ${b.status.followed.length>0
+                        ?`${b.status.followed.foreach((f)=>{
+                            `<p><a href="${f.personLink}">${f.personName}</a></p>`
+                        })}`
+                        :``}
+                    </div>
+                </div>
+                `
+                self.createPopup(html);
             })
             return b;
         })
