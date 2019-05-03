@@ -596,7 +596,7 @@ class Instabot {
                         return p.innerText
                     })
                     document.querySelector(this.element.followerPopupCloseBtn).click()
-                    this.logger(`Finished collecting`,'font-size:8px;color:grey;');
+                    this.logger(`Finished collecting`,this.font.small);
                     setTimeout(()=>resolve(list),1000)
                 }
             }, 1000)
@@ -605,6 +605,7 @@ class Instabot {
     likeAll(){
         document.querySelectorAll(this.element.likeBtn).forEach((b)=>{
             b.click()
+            this.logger(`Liked all visible posts!`,this.font.heading)
         })
     }
     toggleIncludeTop(){
