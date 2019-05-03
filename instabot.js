@@ -7,13 +7,15 @@ class Instabot {
             start: performance.now(),
             delayInitial: 2 * this.s,
             delayLike: 3 * this.s,
-            delayNext: 4 * this.s,
             delayComment: 5 * this.s,
+            delayFollow: 2 * this.s,
+            delayNext: 2 * this.s,
             maxDuration: 10 * this.min,
         };
         this.element = {
             popup: 'div._2dDPU.vCf6V[role=dialog]',
             name : 'a.notranslate:first-child',
+            personImage: 'a._2dbep.qNELH.kIKUG img',
             image: 'article div[role=button] .KL4Bh img.FFVAD',
             post: "a[href*='/p/']:not(.zV_Nj)",
             recentPost : '.yQ0j1:nth-child(2) ~ div a[href*="/p/"]:not(.zV_Nj)',
@@ -34,17 +36,24 @@ class Instabot {
             suggestionsTitle: 'h4._7UhW9',
             commentPostBtn : '.X7cDz button',
         }
+        this.status ={
+            liked : [],
+            followed: [],
+            archivedLiked:[],
+            archivedFollowed:[],
+            unfollowers:[],
+            inProgress: false,
+        }
         this.options = {
             includeTop : true,
+            isFiltering: true,
+            isFollowing : true,
         }
         this.conditions = {
-            isFollowing : true,
-            includeTop: true,
-            maxFollows: 15,
+            maxFollows: 10,
             maxLiked: 80,
             minLikes: 20,
             maxLikes : 300,
-            isFiltering: true,
             imageAlt : [ 
                 '1 person','people','closeup','selfie',
             ],
@@ -79,8 +88,9 @@ class Instabot {
         this.font ={
             heading: 'font-size:12px; font-weight:bold;',
             small : 'font-size:8px;',
-            pass:'font-size:8px;color:teal!important;',
-            error:'font-size:8px;color:red!important',
+            override:'font-size:8px;important;background:rgba(30,144,255,0.3);',
+            pass:'font-size:8px;important;background:rgba(0,256,0,0.3);',
+            error:'font-size:8px;important;background:rgba(256,0,0,0.3)',
         }
     }
     delay(ms){
@@ -90,43 +100,84 @@ class Instabot {
         return c[Math.floor(Math.random()*c.length)] 
     }
     init(){
+        this.status.inProgress = true;
+        this.archive();
         this.openPost()
-        this.delay(2000)
+        console.log(`%c>>>>>>>INITIATING INSTABOT....<<<<<<<`,this.font.heading);
+        this.delay(this.time.delayInitial)
             .then(()=> this.analyzePost() )
+    }
+    archive(){
+        if(this.status.liked.length > 0 ){
+            this.status.archivedLiked.push(this.status.liked);
+            console.log(`%cArchiving likes`,this.font.small);
+            this.status.liked = [];
+        }
+        if(this.status.followed.length > 0 ){
+            this.status.archivedFollowed.push(this.status.followed);
+            console.log(`%cArchiving follows`,this.font.small);
+            this.status.followed = [];
+        }
+    }
+    stop(){
+        console.log(`%c>>>>>>STOPPED<<<<<`,this.font.heading);
+        this.status.inProgress = false;
     }
     openPost(){
         if(!document.querySelector(this.element.popup)){
             const post = (this.options.includeTop)
                 ? document.querySelector(this.element.post)
                 : document.querySelector(this.element.recentPost)
-            post.click();
+            post.click()
         }
     }
     analyzePost(){
-        console.log(`%c==========START=============`,'background:black;');
-        this.resetPost()
-            .then(()=> this.getName())
-            .then(()=> this.openHiddenComments())
-            .then(()=> this.getNumberOfLikes())
-            .then(()=> this.getTags())
-            .then(()=> this.getImageAlt())
-            .then(()=> this.checkLiked())
-            .then(()=> this.checkFollowed())
-            .then(()=> this.validatePost())
-            .then((isValid)=> this.processPost(isValid))
-            .then(()=> this.delay(this.time.delayNext))
-            .then(()=> this.nextImage())
+        if(this.status.inProgress){
+            console.log(`%c===========================================`,'background:black;');
+            this.resetPost()
+                .then(()=> this.getName())
+                .then(()=> this.getNumberOfLikes())
+                .then(()=> this.openHiddenComments())
+                .then(()=> this.getTags())
+                .then(()=> this.getImage())
+                .then(()=> this.checkLiked())
+                .then(()=> this.checkFollowed())
+                .then(()=> this.validatePost())
+                .then((isValid)=> this.processPost(isValid))
+                .then(()=> this.delay(this.time.delayNext))
+                .then(()=> this.nextImage())
+        } else {
+            this.nextImage();
+        }
     }
     nextImage(){
-        const nextbtn = document.querySelector(this.element.nextBtn);
-        nextbtn ? nextbtn.click() : true;
-        this.delay(this.time.delayInitial)
-            .then(()=>this.analyzePost())
+        if(this.status.liked.length >= this.conditions.maxLiked) { 
+            console.log(`%cYou have already liked ${this.conditions.maxLiked} images. Restarting will reset`,this.font.heading);
+            this.stop();
+        }  
+        if(
+            this.status.inProgress
+            && (performance.now() - this.time.start < this.time.maxDuration)
+        ){
+            const nextbtn = document.querySelector(this.element.nextBtn);
+            nextbtn ? nextbtn.click() : true;
+            console.log('%cNEXT====>',this.font.heading);
+            this.delay(this.time.delayInitial)
+                .then(()=>this.analyzePost())
+        } else {
+            console.log(`%c>>>>>>FINISHED<<<<<<`,this.font.heading);
+            console.log(`%cTotal Like count: ${this.status.liked.length} images`,this.font.small);
+            console.log(`%cTotal Follow count: ${this.status.followed.length}`,this.font.small);
+            this.status.followed.forEach((f)=>{
+                console.log(`%c${f.person.personName}: ${f.person.personLink}`, "font-weight:bold; font-size:8px;");
+            })
+        }
     }
     resetPost(){
         return new Promise(resolve=>{
             this.post = {};
-            resolve();
+            this.post.src = window.location.href;
+            return resolve();
         })
     }
     getName(){
@@ -135,16 +186,18 @@ class Instabot {
                 ? {
                     personName : document.querySelector(this.element.name).innerText,
                     personLink : document.querySelector(this.element.name).href,
+                    personImage: document.querySelector(this.element.personImage).src,
                 }
                 : console.log(`%cCouldn't load name. Retrying...`,'font-size:8px; color:red!important;') 
                 && this.waitFor(delay,()=>document.querySelector(this.element.name) != null 
                     ? {
                         personName : document.querySelector(this.element.name).innerText,
                         personLink : document.querySelector(this.element.name).href,
+                        personImage: document.querySelector(this.element.personImage).src,
                     }
                     : null
                 );
-            resolve();
+            return resolve();
         })
     }
     getTags(){
@@ -186,7 +239,7 @@ class Instabot {
                 hasF4F:hasF4F.length>0,
                 hasL4L:hasL4L.length>0,
             }
-            resolve();
+            return resolve();
         })
     }
     openHiddenComments(){
@@ -195,7 +248,7 @@ class Instabot {
             extraReply? extraReply.forEach((t)=>t.click()):true;
             const reply = document.querySelectorAll(this.element.reply);
             reply ? reply.forEach((t)=>t.click()):true;
-            resolve();
+            return resolve();
         })
     }
     getNumberOfLikes(){
@@ -203,12 +256,13 @@ class Instabot {
             this.post.numberOfLikes = document.querySelector(this.element.numberOfLikes) != null
                 ? parseInt(document.querySelector(this.element.numberOfLikes).innerText.replace(',','')) 
                 :0;
-            resolve();
+            return resolve();
         });
     }
-    getImageAlt(){
+    getImage(){
         return new Promise(resolve=>{
             const image = document.querySelector(this.element.image); 
+            const src = image ? image.currentSrc : null
             const alt = image ? image.alt : null
             const isSafe = (alt!=null)
                 ?  this.conditions.imageAlt.some((v)=> {
@@ -216,109 +270,130 @@ class Instabot {
                 })
                 :null
             this.post.image = {
-                alt, isSafe
+                src,
+                alt, 
+                isSafe
             }
-            resolve();
+            return resolve();
         })
     }
     checkLiked(){
         return new Promise(resolve=>{
             this.post.likeBtn = document.querySelector(this.element.likeBtn);
             this.post.liked = (this.post.likeBtn)?false:true;
-            resolve();
+            return resolve();
         });
     }
     checkFollowed(){
         return new Promise(resolve=>{
             this.post.followbtn = document.querySelector(this.element.followBtn);
             this.post.followed = (this.post.followbtn)?false:true;
-            resolve();
+            return resolve();
         })
     }
     validatePost(){
         return new Promise(resolve=>{
-            console.log(this.post);
-            const { 
+            const {
                 person,
+                src,
                 tags,
                 numberOfLikes,
-                image,
                 liked,
                 followed,
             } = this.post;
 
             if(person == null){
                 console.log(`%cCouldn't load the person`, this.font.error)
-                resolve(false);
+                return resolve(false);
             } else {
-                console.log(`%c Analyzing ${person.personName}`,this.font.heading)
+                console.log(`%c ID: ${person.personName}`,this.font.heading)
                 console.log(`%c${person.personLink}`,this.font.small)
+                console.log(`%cCurrent post : ${src}`,this.font.small)
             }
 
             if(liked){
                 console.log(`%cAlready liked.`,this.font.error);
-                resolve(false);
-            } else if (followed){
-                console.log(`%cAlready followed.`,this.font.error);
-                resolve(false);
+                return resolve(false);
+            } 
+            if(!this.options.isFiltering){
+                console.log(`%cFiltering OFF. Skipping Validation.`, this.font.small)
+                return resolve(true);
             }
-
-            if(!this.conditions.isFiltering){
-                console.log(`%cFiltering OFF. Validation Skipping.`, this.font.small)
-                resolve(true);
+            if (followed){
+                console.log(`%cAlready followed.`,this.font.error);
+                return resolve(false);
             }
 
             if(numberOfLikes < this.conditions.minLikes){
                 console.log(`%cNot enough likes`, this.font.error)
-                resolve(false);
+                return resolve(false);
             } else if (numberOfLikes > this.conditions.maxLikes){
                 console.log(`%cToo many likes`, this.font.error)
-                resolve(false);
+                return resolve(false);
             } else {
-                console.log(`%cThis person has ${numberOfLikes} likes.`,this.font.pass);
-            }
+                console.log(`%cPassed like filter : ${this.options.minLikes} < ${numberOfLikes} < ${this.options.maxLikes}`,this.font.pass);
+            } 
 
             if( tags.hasTag.length == 0 ){
                 console.log(`%cNo Matching tags.`,this.font.error);
-                resolve(false);
+                return resolve(false);
             } else if( tags.hasExcludes.length > 0 ){
                 const unwantedTags = tags.hasExcludes.join(',');
                 console.log(`%cFound unwanted tags:`,this.font.error, unwantedTags);
-                resolve(false);
+                return resolve(false);
             } else {
                 const wantedTags = tags.hasTag.join(',');
-                console.log(`%cFound matching ${tags.hasTag.length} tags:`,this.font.error, wantedTags);
-            }
+                console.log(`%cFound ${tags.hasTag.length} matching tags:`,this.font.pass, wantedTags);
+            } 
 
-            if(!image.isSafe){
-                console.log(`%cImage is not safe`,this.font.error);
-                resolve(false);
-            } else {
-                console.log(`%cImage alt : ${image.alt}`,this.font.pass);
-            }
-
-            resolve(true);
+            return resolve(true);
         })
     }
     processPost(isValid){
         return new Promise(resolve=>{
-            if(isValid){
-                this.writeComment()
-                    .then(isCommenting=>this.submitComment(isCommenting))
-                resolve()
+            if(isValid && this.status.inProgress){
+                console.log(`%c......processing......`,this.font.small);
+                (!this.options.isFiltering)
+                    ? console.log(`%c Filtering is OFF.`,this.font.override)
+                    :null;
+                this.likePost()
+                    .then(()=> this.writeComment())
+                    .then(()=> this.submitComment())
+                    .then(()=> this.follow())
+                    .then(()=>resolve())
             } else {
-                resolve();
+                console.log(`%cProcess Skipped`,this.font.error);
+                return resolve();
             }
+        })
+    }
+    likePost(){
+        return new Promise(resolve=>{
+            console.log(`%c..liking post..`,this.font.small);
+            this.delay(this.time.delayLike)
+                .then(()=>{
+                    this.post.likeBtn.click();
+                    this.post.liked = true;
+                    this.status.liked.push(this.post);
+                    console.log(`%cLiked post`,this.font.heading);
+                    return resolve();
+                })
         })
     }
     writeComment(){
         return new Promise(resolve=>{
-            if(this.conditions.isFiltering){
-                const {
-                    followed,
-                    tags,
-                    image,
-                } = this.post;
+            const {
+                liked,
+                tags,
+                image,
+            } = this.post;
+
+            if(
+                this.options.isFiltering 
+                && liked 
+                && (tags.hasF4F || tags.hasL4L)
+                && image.isSafe
+            ){
                 const f4fcom = this.comments.comments.followback;
                 const l4lcom = this.comments.comments.likeback;
                 const input = document.querySelector('.Ypffh'); 
@@ -326,7 +401,7 @@ class Instabot {
                 if(input){
                     const lastValue = input.value;
                     const comment = 
-                        (tags.hasF4F && !followed)
+                        (tags.hasF4F)
                         ? this.generateRandomComment(f4fcom)
                         :(tags.hasL4L)
                         ? this.generateRandomComment(l4lcom)
@@ -341,37 +416,421 @@ class Instabot {
                         tracker.setValue(lastValue);
                     }
                     input.dispatchEvent(event);
-                    resolve(true);
+                    return resolve();
                 } else {
                     console.log(`%cCommenting failed`,this.font.small);
-                    resolve(false);
+                    return resolve();
                 }
             } else {
-                console.log(`%cNot filtering! Skipping comments`,this.font.small);
-                resolve(false);
+                (!this.options.isFiltering)
+                    ?console.log(`%c Skipping comments. Filtering OFF`,this.font.override)
+                    :(!liked)
+                    ?console.log(`%c Skipping comments. Not liked`,this.font.error)
+                    :(!image.isSafe)
+                    ?console.log(`%c Skipping comments. Image not safe`,this.font.error)
+                    :(!tags.hasF4F && !tags.hasL4L)
+                    ?console.log(`%c Skipping comments. Missing required tags`,this.font.error)
+                    :null;
+                return resolve();
             }
         })
     }
-    submitComment(isCommenting){
+    submitComment(){
         return new Promise(resolve=>{
-            if(isCommenting){
-                setTimeout(()=>{
-                    const btn = document.querySelector(this.element.commentPostBtn);
-                    if(btn){
-                        //btn.click()
-                        console.log(`%cPosted comment: "${this.post.comment}"`,this.font.small)
-                        console.log(`%c${window.location.href}`,this.font.small)
-                        resolve(true);
-                    } else {
-                        console.log(`%cCommenting failed`,this.font.small);
-                        resolve(false);
-                    }
-                },this.time.delayComment)
+            if(
+                this.options.isFiltering 
+                && this.post.comment != null
+            ){
+                const btn = document.querySelector(this.element.commentPostBtn);
+                if(btn){
+                    console.log(`%c..posting comment..`,this.font.small)
+                    this.delay(this.time.delayComment)
+                        .then(()=>{
+                            btn.click() 
+                            console.log(`%cPosted comment: "${this.post.comment}"`,this.font.heading)
+                            return resolve() 
+                        })
+                } else {
+                    console.log(`%cComment button missing`,this.font.error);
+                    return resolve();
+                }
             }else{
-                resolve(false);
+                (!this.options.isFiltering)
+                    ? console.log(`%c Skipping Comments submit Filtering OFF`,this.font.override)
+                    :(this.post.comment == null)
+                    ? console.log(`%cComment missing`,this.font.error)
+                    :null;
+                return resolve(false);
             }
         })
+    }
+    follow(){
+        return new Promise(resolve=>{
+            const {
+                tags,
+                comment,
+                followbtn,
+                followed 
+            } = this.post;
+
+            if( 
+                this.options.isFiltering
+                && this.options.isFollowing 
+                && comment != null 
+                && tags.hasF4F
+                && !followed
+                && this.conditions.maxFollows >= this.status.followed.length
+            ){
+                console.log(`%c..Following..`,this.font.small);
+                this.delay(this.time.delayFollow)
+                    .then(()=>{
+                        if(followbtn){
+                            followbtn.click();
+                            this.status.followed.push(this.post);
+                            console.log(`%cFollowed: ${this.post.person.personLink}`,this.font.heading);
+                            resolve();
+                        }
+                        resolve();
+                    })
+            } else {
+                (!this.options.isFiltering)
+                    ? console.log(`%c Skipping follow. Filtering OFF`,this.font.override)
+                    :(this.conditions.maxFollows <= this.status.followed.length)
+                    ? console.log(`%c Skipping follow. Maximum follows reached`,this.font.error)
+                    :(!this.options.isFollowing)
+                    ? console.log(`%c Following option turned off`,this.font.override)
+                    :(followed)
+                    ? console.log(`%c Already following.`,this.font.small)
+                    :(!comment)
+                    ? console.log(`%c Skipping follow. Not commented`,this.font.error)
+                    :(!tags.hasF4F)
+                    ? console.log(`%c Skipping follow. Missing required tags.`,this.font.error)
+                    :null;
+                return resolve();
+            }
+        })
+    }
+    getStatus(){
+        console.log(this.status);
+        console.log(`%c>>>>>STATUS<<<<<`,this.font.heading)
+        console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,this.font.small)
+        console.log(`%cFiltering? : ${this.options.isFiltering}`,this.font.small)
+        if(this.options.isFiltering){
+            console.log(`%cLike limit ? : ${this.conditions.maxLiked}`,this.font.small)
+            console.log(`%cLikes max ? : ${this.conditions.maxLikes} likes`,this.font.small)
+            console.log(`%cLikes min ? : ${this.conditions.minLikes} likes`,this.font.small)
+            console.log(`%cIncluded Tags? : ${this.conditions.include.join(',')}`,this.font.small)
+            console.log(`%cExcluded Tags? : ${this.conditions.exclude.join(',')}`,this.font.small)
+            console.log(`%cComment if? : ${this.comments.conditions.likeback.join(',') + this.comments.conditions.followback.join(',')}`,this.font.small)
+        } else {
+            console.log(`%cInstaBot will like anything but won't follow nor comment`,this.font.small)
+        }
+        console.log(`%cResults`,'font-size:10px;font-weight:bold;')
+        console.log(`%c Current liked : ${this.status.liked.length + this.status.archivedLiked.length}`,this.font.small)
+        console.log(`%c Current followed : ${this.status.followed.length + this.status.archivedFollowed.length}`,this.font.small)
+        if(this.status.archivedFollowed.length>0){
+            this.actions.archivedFollowed.forEach((f)=>{
+                console.log(`%c${f.personName}: ${f.personLink}`,this.font.small);
+            })
+        }
+        if(this.status.followed.length>0){
+            this.actions.followed.forEach((f)=>{
+                console.log(`%c${f.personName}: ${f.personLink}`,this.font.small);
+            })
+        }
+    }
+    async getUnfollowers(){
+        const following = await this.loadFollowers(true);
+        const followers = await this.loadFollowers(false);
+        const unfollowers = following.filter(function(f){
+            return this.indexOf(f) == -1;
+        },followers)
+        this.status.unfollowers.push(unfollowers);
+        console.log(`%cYou have ${unfollowers.length} people who are not following back:`,this.font.heading)
+        unfollowers.forEach((f)=>{
+            console.log(`%c ${f} :  https://www.instagram.com/${f}`,this.font.small)
+        })
+    }
+    async loadFollowers(loadingFollowings){
+        (loadingFollowings)
+            ?console.log(`%c...loading followings...`,this.font.small)
+            :console.log(`%c ...loading followers ...`, this.font.small)
+        return new Promise(async resolve => {
+            const flBtn = document.querySelectorAll(this.element.followersBtn);
+            (loadingFollowings)
+                ? flBtn[flBtn.length-1].click()
+                : flBtn[0].click()
+            const result = await this.delay(this.time.delayInitial).then(()=> this.fetchPeople())
+            resolve(result);
+        })
+    }
+    fetchPeople(){
+        return new Promise(resolve => {
+            const itvl = setInterval(()=>{
+                const scroll = document.querySelector(this.element.followersOverHidden);
+                const loadedHeight = document.querySelector(this.element.followersInnerHeight).scrollHeight
+                const isLoading = (document.querySelector(this.element.suggestionsTitle))
+                    ? scroll.scrollTop != loadedHeight
+                    : (document.querySelector(this.element.followerPopupLoadingIcon))?true:scroll.scrollTop + scroll.offsetHeight != loadedHeight 
+                if(isLoading){
+                    scroll.scrollTop = loadedHeight;
+                } else {
+                    clearInterval(itvl);
+                    const list = Array.from(document.querySelectorAll(this.element.followersList)).map((p)=>{
+                        return p.innerText
+                    })
+                    document.querySelector(this.element.followerPopupCloseBtn).click()
+                    console.log(`%cFinished collecting`,'font-size:8px;color:grey;');
+                    setTimeout(()=>resolve(list),1000)
+                }
+            }, 1000)
+        })
+    }
+    likeAll(){
+        document.querySelectorAll(this.element.likeBtn).forEach((b)=>{
+            b.click()
+        })
+    }
+    toggleIncludeTop(){
+        this.options.includeTop = !this.options.includeTop;
+        this.options.includeTop
+            ? console.log(`%c Start from Top`,this.font.pass)
+            : console.log(`%c Start from Recent`,this.font.error)
+    }
+    toggleFilter(){
+        this.options.isFiltering = !this.options.isFiltering;
+        this.options.isFiltering
+            ? console.log(`%c Filtering turned ON`,this.font.pass)
+            : console.log(`%c Filtering turned OFF`,this.font.error)
+    }
+    toggleFollowing(){
+        this.options.isFollowing = !this.options.isFollowing;
+        this.options.isFollowing
+            ? console.log(`%c Following ON`,this.font.pass)
+            : console.log(`%c Following OFF`,this.font.error)
     }
 }
+
+class InstabotUI {
+    constructor(instabot){
+        this.instabot = instabot;
+        this.style = {
+            left : "position:fixed;bottom:10px;left:10px;padding:15px;z-index:99;",
+            right: "position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;",
+            popup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
+            popupInner: "overflow:scroll;width:100%;height:100%",
+            popupClose: "position:absolute; right:10px; top:10px;",
+            btn : {
+                blue : "background:dodgerblue;color:white;outline:none;border-radius:5px;border:none;padding:5px 10px;margin-top:5px;",
+                red : "background:tomato;color:white;outline:none;border-radius:5px;border:none;padding:5px 10px;margin-top:5px;",
+                green : "background:teal;color:white;outline:none;border-radius:5px;border:none;padding:5px 10px;margin-top:5px;",
+            }
+        }
+    }
+    init(){
+        const left = this.createElement({
+            type:"div", text:"", style:this.style.left,
+            parent:document.body,
+        },el=>el)
+        const right = this.createElement({
+            type:"div", text:"", style:this.style.right,
+            parent:document.body,
+        },el=>el)
+
+        this.toggleFollowingBtn(left);
+        this.toggleIncludeTopBtn(left);
+        this.toggleFilterBtn(left);
+        this.statusBtn(left);
+        this.showLiked(left);
+
+        this.getUnfollowersBtn(right);
+        this.likeAllBtn(right);
+        this.startBtn(right);
+    }
+    createElement({ type,text,style,parent }, cb){
+        const el = document.createElement(type);
+        el.innerHTML = text;
+        el.style = style;
+        parent.appendChild(el);
+        return cb(el);
+    }
+    createPopup(content){
+        const popup = this.createElement({
+            type:"div",
+            text:"",
+            style:this.style.popup,
+            parent:document.body,
+        },p=>{
+            const popupInner = this.createElement({
+                type:"div",
+                text:`${content}`,
+                style:this.style.popupInner,
+                parent:p,
+            },pInner=>{
+                pInner = this.createElement({
+                    type:'button',
+                    text:"Close",
+                    style:this.style.popupClose,
+                    parent:pInner,
+                },pbtn=>{
+                    pbtn.addEventListener('click',function(){
+                        p.parentNode.removeChild(p); 
+                        return p;
+                    })
+                })
+            })
+        })
+    }
+    startBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            type:'button',
+            text:"Start Instabot",
+            style: self.style.btn.green,
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                if(this.className == 'started'){
+                    self.instabot.stop();
+                    this.innerText="Start Instabot";
+                    this.style = self.style.btn.green;
+                } else {
+                    self.instabot.init();
+                    this.innerText = "Stop Instabot";
+                    this.style = self.style.btn.red;
+                }
+                this.classList.toggle('started');
+            })
+        })
+        return btn;
+    }
+    likeAllBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            type:'button',
+            text:"Like All",
+            style: this.style.btn.green,
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                self.instabot.likeAll();
+            })
+        })
+        return btn;
+    }
+    getUnfollowersBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            type:'button',
+            text:"Find Unfollowers",
+            style: this.style.btn.green,
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                self.instabot.getUnfollowers();
+            })
+        })
+        return btn;
+    }
+    statusBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            type:'button',
+            text:"Status",
+            style: this.style.btn.blue,
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                self.instabot.getStatus();
+            })
+        })
+        return btn;
+    }
+    showLiked(parent){
+        const self = this;
+        const btn = this.createElement({
+            type:'button',
+            text:"Show Liked",
+            style: this.style.btn.green,
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                self.createPopup('Lets show the list');
+            })
+        })
+        return btn;
+    }
+    toggleIncludeTopBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            type:'button',
+            text:"From Top",
+            style: self.style.btn.blue,
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                if(this.className == 'off'){
+                    self.instabot.toggleIncludeTop();
+                    this.innerText="From Top";
+                    this.style = self.style.btn.blue;
+                } else {
+                    self.instabot.toggleIncludeTop();
+                    this.innerText = "From Recent";
+                    this.style = self.style.btn.red;
+                }
+                this.classList.toggle('off');
+            })
+        })
+        return btn;
+    }
+    toggleFilterBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            type:'button',
+            text:"Filter ON",
+            style: self.style.btn.blue,
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                if(this.className == 'off'){
+                    self.instabot.toggleFilter();
+                    this.innerText="Filter ON";
+                    this.style = self.style.btn.blue;
+                } else {
+                    self.instabot.toggleFilter();
+                    this.innerText = "Filter OFF";
+                    this.style = self.style.btn.red;
+                }
+                this.classList.toggle('off');
+            })
+        })
+        return btn;
+    }
+    toggleFollowingBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            type:'button',
+            text:"Following ON",
+            style: self.style.btn.blue,
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                if(this.className == 'off'){
+                    self.instabot.toggleFollowing();
+                    this.innerText="Following ON";
+                    this.style = self.style.btn.blue;
+                } else {
+                    self.instabot.toggleFollowing();
+                    this.innerText = "Following OFF";
+                    this.style = self.style.btn.red;
+                }
+                this.classList.toggle('off');
+            })
+        })
+        return btn;
+    }
+}
+
 const instabot = new Instabot();
-instabot.init();
+const UI = new InstabotUI(instabot);
+UI.init()
