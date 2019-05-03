@@ -122,7 +122,7 @@ class Instabot {
         }
     }
     stop(){
-        console.log(`%c>>>>>>STOPPED<<<<<`,this.font.heading);
+        console.log(`%c....stopping the process... please wait....`,this.font.small);
         this.status.inProgress = false;
     }
     openPost(){
@@ -180,13 +180,13 @@ class Instabot {
             this.status.followed.forEach((f)=>{
                 console.log(`%c${f.person.personName}: ${f.person.personLink}`, "font-weight:bold; font-size:8px;");
             })
+            document.querySelector(this.element.postCloseBtn).click();
         }
     }
     checkEndOfPost(){
         return new Promise(resolve=>{
             if(this.post.src == window.location.href){
                 console.log(`%cEnd of posts`,this.font.heading)
-                document.querySelector(this.element.postCloseBtn).click();
                 var evt = new KeyboardEvent('keydown', {'keyCode':222, 'which':222});
                 document.dispatchEvent(evt);
             }
