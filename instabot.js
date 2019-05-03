@@ -647,8 +647,9 @@ class InstabotUI {
         this.likeAllBtn(right);
         this.startBtn(right);
     }
-    createElement({ type,text,style,parent }, cb){
+    createElement({ id, type,text,style,parent }, cb){
         const el = document.createElement(type);
+        el.id = id;
         el.innerHTML = text;
         el.style = style;
         parent.appendChild(el);
@@ -656,18 +657,21 @@ class InstabotUI {
     }
     createPopup(content){
         const popup = this.createElement({
+            id:'Popup',
             type:"div",
             text:"",
             style:this.style.popup,
             parent:document.body,
         },p=>{
             const popupInner = this.createElement({
+                id:'PopupInner',
                 type:"div",
                 text:`${content}`,
                 style:this.style.popupInner,
                 parent:p,
             },pInner=>{
                 pInner = this.createElement({
+                    id:'PopupClose',
                     type:'button',
                     text:"Close",
                     style:this.style.popupClose,
@@ -684,6 +688,7 @@ class InstabotUI {
     startBtn(parent){
         const self = this;
         const btn = this.createElement({
+            id:'StartBtn',
             type:'button',
             text:"Start Instabot",
             style: self.style.btn.green,
@@ -707,6 +712,7 @@ class InstabotUI {
     likeAllBtn(parent){
         const self = this;
         const btn = this.createElement({
+            id:'LikeAllBtn',
             type:'button',
             text:"Like All",
             style: this.style.btn.green,
@@ -721,6 +727,7 @@ class InstabotUI {
     getUnfollowersBtn(parent){
         const self = this;
         const btn = this.createElement({
+            id:'UnfollowersBtn',
             type:'button',
             text:"Find Unfollowers",
             style: this.style.btn.green,
@@ -735,6 +742,7 @@ class InstabotUI {
     statusBtn(parent){
         const self = this;
         const btn = this.createElement({
+            id:'StatusBtn',
             type:'button',
             text:"Status",
             style: this.style.btn.blue,
@@ -749,6 +757,7 @@ class InstabotUI {
     showLiked(parent){
         const self = this;
         const btn = this.createElement({
+            id:'ShowLikedBtn',
             type:'button',
             text:"Show Liked",
             style: this.style.btn.green,
@@ -763,6 +772,7 @@ class InstabotUI {
     toggleIncludeTopBtn(parent){
         const self = this;
         const btn = this.createElement({
+            id:'ToggleTopBtn',
             type:'button',
             text:"From Top",
             style: self.style.btn.blue,
@@ -786,6 +796,7 @@ class InstabotUI {
     toggleFilterBtn(parent){
         const self = this;
         const btn = this.createElement({
+            id:'ToggleFilterBtn',
             type:'button',
             text:"Filter ON",
             style: self.style.btn.blue,
@@ -809,6 +820,7 @@ class InstabotUI {
     toggleFollowingBtn(parent){
         const self = this;
         const btn = this.createElement({
+            id:'ToggleFollowingBtn',
             type:'button',
             text:"Following ON",
             style: self.style.btn.blue,
