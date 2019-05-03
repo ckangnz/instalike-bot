@@ -18,6 +18,7 @@ class Instabot {
             personImage: 'article ._2dbep img',
             image: 'article div[role=button] .KL4Bh img.FFVAD',
             post: "a[href*='/p/']:not(.zV_Nj)",
+            postCloseBtn: ".ckWGn",
             recentPost : '.yQ0j1:nth-child(2) ~ div a[href*="/p/"]:not(.zV_Nj)',
             numberOfLikes : `article section div div:last-child button[type=button] span,
                              article section div div:last-child a.zV_Nj span`,
@@ -168,8 +169,9 @@ class Instabot {
             nextbtn ? nextbtn.click() : true;
             console.log(`%cLiked ${this.status.liked.length} images`,this.font.small);
             console.log(`%cFollowed ${this.status.followed.length} people`,this.font.small);
-            console.log('%cNEXT====>',this.font.heading);
+            console.log('%c====NEXT====>',this.font.heading);
             this.delay(this.time.delayInitial)
+                .then(()=>this.checkEndOfPost())
                 .then(()=>this.analyzePost())
         } else {
             console.log(`%cTotal Like count: ${this.status.liked.length} images`,this.font.small);
@@ -179,6 +181,17 @@ class Instabot {
                 console.log(`%c${f.person.personName}: ${f.person.personLink}`, "font-weight:bold; font-size:8px;");
             })
         }
+    }
+    checkEndOfPost(){
+        return new Promise(resolve=>{
+            if(this.post.src == window.location.href){
+                console.log(`%cEnd of posts`,this.font.heading)
+                document.querySelector(this.element.postCloseBtn).click();
+                var evt = new KeyboardEvent('keydown', {'keyCode':222, 'which':222});
+                document.dispatchEvent(evt);
+            }
+            resolve();
+        })
     }
     resetPost(){
         return new Promise(resolve=>{
