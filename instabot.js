@@ -695,7 +695,6 @@ class InstabotUI {
 
         const self = this;
         document.addEventListener('keydown',function(e){
-            console.log(e);
             if(e.keyCode == '222'){
                 // '
                 e.preventDefault();

@@ -39,6 +39,17 @@ The Instabot will NOT do these if Filtering is turned off:
   7. Click Start Instabot OR press `'`
   8. Press `'` to stop
 
+### Hoykeys
+
+  | Key         | Task                                                                            |
+  | :---------- | :-----------                                                                    |
+  | `'`         | Start / Stop Instabot                                                           |
+  | `\`         | Toggle Filter (Filtering off will like everything but won't comment nor follow) |
+  | `Shift + \` | Toggle Following (Following off will not comment for F4F)                       |
+  | `=`         | Show my likes                                                                   |
+  | `;`         | Toggle Logs                                                                     |
+  | `:`         | Clear Logs                                                                      |
+
 note: You can't click any buttons when instabot is in progress. Press `'` and wait until the last task is done.
 
 ---
