@@ -684,6 +684,7 @@ class InstabotUI {
         const togglefilterbtn = this.toggleFilterBtn(left);
         const statusbtn = this.statusBtn(left);
         const showlikedbtn = this.showLikedBtn(left);
+        const togglelogboxbtn = this.toggleLogBoxBtn(left);
         const clearlogbtn = this.clearLogBtn(left);
 
         const getunfollowersbtn = this.getUnfollowersBtn(right);
@@ -695,6 +696,14 @@ class InstabotUI {
             if(e.keyCode == '222'){
                 e.preventDefault();
                 self.startBtnClicked(startbtn);
+            }
+            if(e.keyCode == '186' && !e.shiftKey){
+                e.preventDefault();
+                self.toggleLogBoxClicked(startbtn);
+            }
+            if(e.keyCode == '186' && e.shiftKey){
+                e.preventDefault();
+                self.instabot.clearLogger();
             }
         })
     }
@@ -769,7 +778,7 @@ class InstabotUI {
         const btn = this.createElement({
             id:'ClearLogBtn',
             type:'button',
-            text:"Clear logs",
+            text:"Clear logs (:)",
             style: this.style.btn.red,
             parent,
         },b=>{
@@ -989,6 +998,28 @@ class InstabotUI {
             return b;
         })
         return btn;
+    }
+    toggleLogBoxBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            id:'ToggleLogBox',
+            type:'button',
+            text:"Toggle Log box (;)",
+            style: self.style.btn.green,
+            parent,
+        },b=>{
+            b.addEventListener('click',()=>self.toggleLogBoxClicked())
+            return b;
+        })
+        return btn;
+    }
+    toggleLogBoxClicked(){
+        const logger = document.getElementById('LogBox')
+        if(logger.style.display != 'none'){
+            logger.style.display = 'none';
+        } else {
+            logger.style.display = 'block';
+        }
     }
 }
 const instabot = new Instabot();
