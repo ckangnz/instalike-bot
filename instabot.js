@@ -50,6 +50,7 @@ class Instabot {
             includeTop : true,
             isFiltering: true,
             isFollowing : true,
+            isCommenting : true,
         }
         this.conditions = {
             maxFollows: 10,
@@ -430,6 +431,7 @@ class Instabot {
 
             if(
                 this.options.isFiltering 
+                && this.options.isCommenting 
                 && liked 
                 && (tags.hasF4F || tags.hasL4L)
                 && image.isSafe
@@ -466,6 +468,8 @@ class Instabot {
             } else {
                 (!this.options.isFiltering)
                     ?null
+                    :(!this.options.isCommenting)
+                    ?this.logger(`Skipping comments. Commenting Off`,this.font.override)
                     :(!liked)
                     ?this.logger(`Skipping comments. Not liked`,this.font.error)
                     :(!image.isSafe)
@@ -481,6 +485,7 @@ class Instabot {
         return new Promise(resolve=>{
             if(
                 this.options.isFiltering 
+                && this.options.isCommenting
                 && this.post.comment != null
             ){
                 const btn = document.querySelector(this.element.commentPostBtn);
@@ -498,7 +503,9 @@ class Instabot {
                 }
             }else{
                 (!this.options.isFiltering)
-                    ?null 
+                    ? null 
+                    :(!this.options.isCommenting)
+                    ? null
                     :(this.post.comment == null)
                     ? this.logger(`Comment missing`,this.font.error)
                     :null;
@@ -517,6 +524,7 @@ class Instabot {
 
             if( 
                 this.options.isFiltering
+                && this.options.isCommenting 
                 && this.options.isFollowing 
                 && comment != null 
                 && tags.hasF4F
@@ -537,6 +545,8 @@ class Instabot {
                     })
             } else {
                 (!this.options.isFiltering)
+                    ? null
+                    :(this.options.isCommenting && !comment)
                     ? null
                     :(this.conditions.maxFollows <= this.status.followed.length)
                     ? this.logger(`Skipping follow. Maximum follows reached`,this.font.error)
@@ -629,6 +639,12 @@ class Instabot {
             ? this.logger(`Following ON`,this.font.pass)
             : this.logger(`Following OFF`,this.font.error)
     }
+    toggleCommenting(){
+        this.options.isCommenting = !this.options.isCommenting;
+        this.options.isCommenting
+            ? this.logger(`Commenting ON`,this.font.pass)
+            : this.logger(`Commenting OFF`,this.font.error)
+    }
 }
 class InstabotUI {
     constructor(instabot){
@@ -684,6 +700,7 @@ class InstabotUI {
         const mylikedbtn = this.myLikedBtn(left);
         const togglelogboxbtn = this.toggleLogBoxBtn(left);
         const togglefilterbtn = this.toggleFilterBtn(left);
+        const togglecommentingbtn = this.toggleCommentingBtn(left);
         const togglefollowbtn = this.toggleFollowingBtn(left);
         const toggleincludebtn = this.toggleIncludeTopBtn(left);
         const statusbtn = this.statusBtn(left);
@@ -696,24 +713,24 @@ class InstabotUI {
         const self = this;
         document.addEventListener('keydown',function(e){
             if(e.keyCode == '222'){
-                // '
+                // ' to start
                 e.preventDefault();
                 self.startBtnClicked(startbtn);
             }
             if(e.keyCode == '186' && !e.shiftKey){
-                // ;
+                // ; to toggle log box
                 e.preventDefault();
                 self.toggleLogBoxClicked(startbtn);
             }
             if(e.keyCode == '186' && e.shiftKey){
-                // :
+                // : clear log box
                 e.preventDefault();
                 self.instabot.clearLogger();
             }
             if(e.keyCode == '220' && !e.shiftKey){
                 // \
                 e.preventDefault();
-                self.toggleFilterBtnClicked(togglefilterbtn);
+                self.toggleCommentingBtnClicked(togglecommentingbtn);
             }
             if(e.keyCode == '220' && e.shiftKey){
                 // |
@@ -724,6 +741,11 @@ class InstabotUI {
                 // =
                 e.preventDefault();
                 self.myLikedBtnClicked(mylikedbtn);
+            }
+            if(e.keyCode == '189'){
+                // -
+                e.preventDefault();
+                self.toggleFilterBtnClicked(togglefilterbtn);
             }
         })
     }
@@ -773,7 +795,7 @@ class InstabotUI {
         const btn = this.createElement({
             id:'StartBtn',
             type:'button',
-            text:"Start instabot (')",
+            text:"Start instabot ( ' )",
             style: self.style.btn.green,
             parent,
         },b=>{
@@ -785,11 +807,11 @@ class InstabotUI {
     startBtnClicked(btn){
         if(btn.className == 'started'){
             this.instabot.stop();
-            btn.innerText="Start instabot (')";
+            btn.innerText="Start instabot ( ' )";
             btn.style = this.style.btn.green;
         } else {
             this.instabot.init();
-            btn.innerText = "Stop instabot (')";
+            btn.innerText = "Stop instabot ( ' )";
             btn.style = this.style.btn.red;
         }
         btn.classList.toggle('started');
@@ -799,7 +821,7 @@ class InstabotUI {
         const btn = this.createElement({
             id:'ClearLogBtn',
             type:'button',
-            text:"Clear logs (:)",
+            text:"Clear logs ( : )",
             style: this.style.btn.red,
             parent,
         },b=>{
@@ -982,7 +1004,7 @@ class InstabotUI {
         const btn = this.createElement({
             id:'ToggleFilterBtn',
             type:'button',
-            text:"Filter ON ( \\ )",
+            text:"Filter ON ( - )",
             style: self.style.btn.blue,
             parent,
         },b=>{
@@ -994,11 +1016,11 @@ class InstabotUI {
     toggleFilterBtnClicked(btn){
         if(btn.className == 'off'){
             this.instabot.toggleFilter();
-            btn.innerText="Filter ON ( \\ )";
+            btn.innerText="Filter ON ( - )";
             btn.style = this.style.btn.blue;
         } else {
             this.instabot.toggleFilter();
-            btn.innerText = "Filter OFF ( \\ )";
+            btn.innerText = "Filter OFF ( - )";
             btn.style = this.style.btn.red;
         }
         btn.classList.toggle('off');
@@ -1029,12 +1051,38 @@ class InstabotUI {
         }
         btn.classList.toggle('off');
     }
+    toggleCommentingBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            id:'ToggleCommentingBtn',
+            type:'button',
+            text:"Commenting ON ( \\ )",
+            style: self.style.btn.blue,
+            parent,
+        },b=>{
+            b.addEventListener('click',()=>toggleCommentingBtnClicked(b))
+            return b;
+        })
+        return btn;
+    }
+    toggleCommentingBtnClicked(btn){
+        if(btn.className == 'off'){
+            this.instabot.toggleCommenting();
+            btn.innerText="Commenting ON ( \\ )";
+            btn.style = this.style.btn.blue;
+        } else {
+            this.instabot.toggleCommenting();
+            btn.innerText = "Commenting OFF ( \\ )";
+            btn.style = this.style.btn.red;
+        }
+        btn.classList.toggle('off');
+    }
     toggleLogBoxBtn(parent){
         const self = this;
         const btn = this.createElement({
             id:'ToggleLogBox',
             type:'button',
-            text:"Toggle Log box (;)",
+            text:"Toggle Log box ( ; )",
             style: self.style.btn.green,
             parent,
         },b=>{

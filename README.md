@@ -44,8 +44,9 @@ The Instabot will NOT do these if Filtering is turned off:
   | Key         | Task                                                                            |
   | :---------- | :-----------                                                                    |
   | `'`         | Start / Stop Instabot                                                           |
-  | `\`         | Toggle Filter (Filtering off will like everything but won't comment nor follow) |
-  | `Shift + \` | Toggle Following (Following off will not comment for F4F)                       |
+  | `-`         | Toggle Filter (Filtering off will like everything but won't comment nor follow) |
+  | `\`         | Toggle Commenting (Commenting off will not comment nor follow)                  |
+  | `Shift + \` | Toggle Following (Following off will only comments for L4L)                     |
   | `=`         | Show my likes                                                                   |
   | `;`         | Toggle Logs                                                                     |
   | `:`         | Clear Logs                                                                      |
