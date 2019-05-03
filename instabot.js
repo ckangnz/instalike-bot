@@ -10,7 +10,7 @@ class Instabot {
             delayComment: 5 * this.s,
             delayFollow: 2 * this.s,
             delayNext: 2 * this.s,
-            maxDuration: 10 * this.min,
+            maxDuration: 5 * this.min,
         };
         this.element = {
             popup: 'div._2dDPU.vCf6V[role=dialog]',
@@ -65,9 +65,9 @@ class Instabot {
             ] || [],
             exclude: [
                 '10k','20k','30k','10kfollowers','20kfollowers',
-                '흔남','훈남','셀기꾼',
-                '육아스타그램','육아',
-                '맛집',
+                '흔남','훈남','오늘의훈남','셀기꾼',
+                '육아스타그램','육아','육아그램',
+                '고딩','18','19','고1','고2','고3',
             ]
         }
         this.comments = {
@@ -78,13 +78,13 @@ class Instabot {
             comments : {
                 followback: [
                     '선팔하고 가요! 맞팔해주세용','선팔했습니다아아! 맞팔해용','선팔합니다~ 맞팔해주시꺼죠?',
-                    '맞팔해요','맞팔해주세요','맞팔할까요','반가워요! 먼저 팔로우하고 갈게요','먼저 팔로합니다!',
+                    '맞팔해요','맞팔해여엇!','맞팔해주세여','맞팔할까욧','반가워요! 먼저 팔로우하고 갈게요','먼저 팔로합니다!',
                 ],
                 likeback: [
                     '피드 잘보구가요','좋아요하구갑니다','안녕하세요 :) 조아요누르고가요','제꺼두 좋아요 눌러주시와요 ㅋㅋ','죠아욧!','굳굳','좋반요!','좋아요반사요!','좋반이요','좋아요 반사왔어요~~',
                 ]
             },
-            emoji: [ '😊','😛','🤗','😄','🤙','👍','🙌','🙏','' ]
+            emoji: [ '😊','😛','🤗','😄','🤙','👍','🙌','🙏',':)',':D',';)' ]
         }
         this.font ={
             heading: 'font-size:12px; font-weight:bold;',
@@ -534,23 +534,24 @@ class Instabot {
         })
     }
     getStatus(){
-        console.log(this.status);
-        console.log(`%c>>>>>STATUS<<<<<`,this.font.heading)
-        console.log(`%cDuration? : ${this.time.maxDuration/this.min} min`,this.font.small)
-        console.log(`%cFiltering? : ${this.options.isFiltering}`,this.font.small)
+        console.log(`%cStatus`,this.font.heading)
+        console.log(`%cDuration : ${this.time.maxDuration/this.min} min`,this.font.small)
+        console.log(`%cFiltering : ${this.options.isFiltering}`,this.font.small)
+        console.log(`%cFollwing : ${this.options.isFollowing}`,this.font.small)
         if(this.options.isFiltering){
             console.log(`%cLike limit ? : ${this.conditions.maxLiked}`,this.font.small)
             console.log(`%cLikes max ? : ${this.conditions.maxLikes} likes`,this.font.small)
             console.log(`%cLikes min ? : ${this.conditions.minLikes} likes`,this.font.small)
-            console.log(`%cIncluded Tags? : ${this.conditions.include.join(',')}`,this.font.small)
-            console.log(`%cExcluded Tags? : ${this.conditions.exclude.join(',')}`,this.font.small)
-            console.log(`%cComment if? : ${this.comments.conditions.likeback.join(',') + this.comments.conditions.followback.join(',')}`,this.font.small)
+            console.log(`%cLike if : ${this.conditions.include.join(',')}`,this.font.small)
+            console.log(`%cDon't like if : ${this.conditions.exclude.join(',')}`,this.font.small)
+            console.log(`%cComment if : ${this.comments.conditions.likeback.join(',') + this.comments.conditions.followback.join(',')}`,this.font.small)
         } else {
             console.log(`%cInstaBot will like anything but won't follow nor comment`,this.font.small)
         }
-        console.log(`%cResults`,'font-size:10px;font-weight:bold;')
+        console.log(`%cResults`,this.font.heading)
         console.log(`%c Current liked : ${this.status.liked.length + this.status.archivedLiked.length}`,this.font.small)
         console.log(`%c Current followed : ${this.status.followed.length + this.status.archivedFollowed.length}`,this.font.small)
+        console.log(this.status);
         if(this.status.archivedFollowed.length>0){
             this.status.archivedFollowed.forEach((f)=>{
                 console.log(`%c${f.personName}: ${f.personLink}`,this.font.small);
