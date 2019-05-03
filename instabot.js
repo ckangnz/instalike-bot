@@ -679,12 +679,12 @@ class InstabotUI {
             })
         })
 
+        const mylikedbtn = this.myLikedBtn(left);
+        const togglelogboxbtn = this.toggleLogBoxBtn(left);
+        const togglefilterbtn = this.toggleFilterBtn(left);
         const togglefollowbtn = this.toggleFollowingBtn(left);
         const toggleincludebtn = this.toggleIncludeTopBtn(left);
-        const togglefilterbtn = this.toggleFilterBtn(left);
         const statusbtn = this.statusBtn(left);
-        const showlikedbtn = this.showLikedBtn(left);
-        const togglelogboxbtn = this.toggleLogBoxBtn(left);
         const clearlogbtn = this.clearLogBtn(left);
 
         const getunfollowersbtn = this.getUnfollowersBtn(right);
@@ -719,6 +719,11 @@ class InstabotUI {
                 e.preventDefault();
                 self.toggleFollowingBtnClicked(togglefollowbtn);
             }
+            if(e.keyCode == '187'){
+                // =
+                e.preventDefault();
+                self.myLikedBtnClicked(mylikedbtn);
+            }
         })
     }
     createElement({ id, type,text,style,parent }, cb){
@@ -751,15 +756,16 @@ class InstabotUI {
                     style:this.style.popupClose,
                     parent:pInner,
                 },pbtn=>{
-                    pbtn.addEventListener('click',function(){
-                        p.parentNode.removeChild(p); 
-                        return p;
-                    })
+                    pbtn.addEventListener('click',()=>this.closePopup(p));
                 })
             })
             return p;
         })
         return popup;
+    }
+    closePopup(p){
+        p.parentNode.removeChild(p); 
+        return p;
     }
     startBtn(parent){
         const self = this;
@@ -904,39 +910,46 @@ class InstabotUI {
         })
         return btn;
     }
-    showLikedBtn(parent){
+    myLikedBtn(parent){
         const self = this;
         const btn = this.createElement({
-            id:'ShowLikedBtn',
+            id:'MyLikedBtn',
             type:'button',
-            text:"Show Liked",
+            text:"My Likes ( = )",
             style: this.style.btn.green,
             parent,
         },b=>{
-            b.addEventListener('click',function(){
-                const liked = [ ...self.instabot.status.liked , ...self.instabot.status.archivedLiked];
-                const html = `
-                <ul style="${self.style.ul}">
+            b.addEventListener('click',()=>myLikedBtnClicked(b));
+            return b;
+        })
+        return btn;
+    }
+    myLikedBtnClicked(btn){
+        if(btn.className == 'off'){
+            const popup = document.getElementById('Popup');
+            this.closePopup(popup);
+        } else {
+            const liked = [ ...this.instabot.status.liked , ...this.instabot.status.archivedLiked];
+            const html = `
+                <ul style="${this.style.ul}">
                     ${liked.map((t)=>( 
-                        `<li style="${self.style.li}">
-                            <div style="${self.style.person}">
-                                <span style=${(t.followed)?self.style.personFollowed:self.style.personNotFollowed}>${(t.followed)?"Followed":"Not Following"}</span>
+                        `<li style="${this.style.li}">
+                            <div style="${this.style.person}">
+                                <span style=${(t.followed)?this.style.personFollowed:this.style.personNotFollowed}>${(t.followed)?"Followed":"Not Following"}</span>
                                 <a href="${t.person.personLink}" target="_blank">${t.person.personName}</a>
-                                <img style="${self.style.personImage}" src="${t.person.personImage}"/>
+                                <img style="${this.style.personImage}" src="${t.person.personImage}"/>
                             </div>
                             <a style="text-align:center;"href="${t.src}"target="_blank">
-                                <img style="${self.style.postImage}" src="${t.image.src}"/>
+                                <img style="${this.style.postImage}" src="${t.image.src}"/>
                             </a>
-                            <p style="${self.style.postCommented}">${(t.comment != null)? `Comment: ${t.comment}`:"Not commented"}</p>
+                            <p style="${this.style.postCommented}">${(t.comment != null)? `Comment: ${t.comment}`:"Not commented"}</p>
                         </li>`
                     )).join('')}
                 </ul>
                 `
-                self.createPopup(html);
-            })
-            return b;
-        })
-        return btn;
+            this.createPopup(html);
+        }
+        btn.classList.toggle('off');
     }
     toggleIncludeTopBtn(parent){
         const self = this;
