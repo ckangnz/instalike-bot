@@ -167,8 +167,9 @@ class Instabot {
         ){
             const nextbtn = document.querySelector(this.element.nextBtn);
             nextbtn ? nextbtn.click() : true;
-            console.log(`%cLiked ${this.status.liked.length} images`,this.font.small);
-            console.log(`%cFollowed ${this.status.followed.length} people`,this.font.small);
+            console.log(`%cLiked ${this.status.liked.length} images. (max:${this.conditions.maxLiked})`,this.font.small);
+            console.log(`%cFollowed ${this.status.followed.length} people (max:${this.conditions.maxFollows})`,this.font.small);
+            console.log(`%cTime remaining: ${ Math.round((this.time.maxDuration - (performance.now() - this.time.start))/this.min*10)/10} minutes`,this.font.small);
             console.log('%c====NEXT====>',this.font.heading);
             this.delay(this.time.delayInitial)
                 .then(()=>this.checkEndOfPost())
