@@ -148,6 +148,8 @@ class Instabot {
             const post = (this.options.includeTop)
                 ? document.querySelector(this.element.post)
                 : document.querySelector(this.element.recentPost)
+                ? document.querySelector(this.element.recentPost)
+                : document.querySelector(this.element.post) && this.logger(`Recent post missing!`,this.font.error)
             post.click()
         }
     }
