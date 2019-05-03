@@ -693,17 +693,31 @@ class InstabotUI {
 
         const self = this;
         document.addEventListener('keydown',function(e){
+            console.log(e);
             if(e.keyCode == '222'){
+                // '
                 e.preventDefault();
                 self.startBtnClicked(startbtn);
             }
             if(e.keyCode == '186' && !e.shiftKey){
+                // ;
                 e.preventDefault();
                 self.toggleLogBoxClicked(startbtn);
             }
             if(e.keyCode == '186' && e.shiftKey){
+                // :
                 e.preventDefault();
                 self.instabot.clearLogger();
+            }
+            if(e.keyCode == '220' && !e.shiftKey){
+                // \
+                e.preventDefault();
+                self.toggleFilterBtnClicked(togglefilterbtn);
+            }
+            if(e.keyCode == '220' && e.shiftKey){
+                // |
+                e.preventDefault();
+                self.toggleFollowingBtnClicked(togglefollowbtn);
             }
         })
     }
@@ -954,50 +968,52 @@ class InstabotUI {
         const btn = this.createElement({
             id:'ToggleFilterBtn',
             type:'button',
-            text:"Filter ON",
+            text:"Filter ON ( \\ )",
             style: self.style.btn.blue,
             parent,
         },b=>{
-            b.addEventListener('click',function(){
-                if(this.className == 'off'){
-                    self.instabot.toggleFilter();
-                    this.innerText="Filter ON";
-                    this.style = self.style.btn.blue;
-                } else {
-                    self.instabot.toggleFilter();
-                    this.innerText = "Filter OFF";
-                    this.style = self.style.btn.red;
-                }
-                this.classList.toggle('off');
-            })
+            b.addEventListener('click',()=>toggleFilterBtnClicked(b));
             return b;
         })
         return btn;
+    }
+    toggleFilterBtnClicked(btn){
+        if(btn.className == 'off'){
+            this.instabot.toggleFilter();
+            btn.innerText="Filter ON ( \\ )";
+            btn.style = this.style.btn.blue;
+        } else {
+            this.instabot.toggleFilter();
+            btn.innerText = "Filter OFF ( \\ )";
+            btn.style = this.style.btn.red;
+        }
+        btn.classList.toggle('off');
     }
     toggleFollowingBtn(parent){
         const self = this;
         const btn = this.createElement({
             id:'ToggleFollowingBtn',
             type:'button',
-            text:"Following ON",
+            text:"Following ON ( \| )",
             style: self.style.btn.blue,
             parent,
         },b=>{
-            b.addEventListener('click',function(){
-                if(this.className == 'off'){
-                    self.instabot.toggleFollowing();
-                    this.innerText="Following ON";
-                    this.style = self.style.btn.blue;
-                } else {
-                    self.instabot.toggleFollowing();
-                    this.innerText = "Following OFF";
-                    this.style = self.style.btn.red;
-                }
-                this.classList.toggle('off');
-            })
+            b.addEventListener('click',()=>toggleFollowingBtnClicked(b))
             return b;
         })
         return btn;
+    }
+    toggleFollowingBtnClicked(btn){
+        if(btn.className == 'off'){
+            this.instabot.toggleFollowing();
+            btn.innerText="Following ON ( \| )";
+            btn.style = this.style.btn.blue;
+        } else {
+            this.instabot.toggleFollowing();
+            btn.innerText = "Following OFF ( \| )";
+            btn.style = this.style.btn.red;
+        }
+        btn.classList.toggle('off');
     }
     toggleLogBoxBtn(parent){
         const self = this;
