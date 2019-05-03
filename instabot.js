@@ -101,6 +101,7 @@ class Instabot {
     }
     init(){
         this.status.inProgress = true;
+        this.time.start = performance.now();
         this.archive();
         this.openPost()
         console.log(`%c>>>>>>>INITIATING INSTABOT....<<<<<<<`,this.font.heading);
@@ -165,13 +166,15 @@ class Instabot {
         ){
             const nextbtn = document.querySelector(this.element.nextBtn);
             nextbtn ? nextbtn.click() : true;
+            console.log(`%cLiked ${this.status.liked.length} images`,this.font.small);
+            console.log(`%cFollowed ${this.status.followed.length} people`,this.font.small);
             console.log('%cNEXT====>',this.font.heading);
             this.delay(this.time.delayInitial)
                 .then(()=>this.analyzePost())
         } else {
-            console.log(`%c>>>>>>FINISHED<<<<<<`,this.font.heading);
             console.log(`%cTotal Like count: ${this.status.liked.length} images`,this.font.small);
             console.log(`%cTotal Follow count: ${this.status.followed.length}`,this.font.small);
+            console.log(`%c>>>>>>FINISHED<<<<<<`,this.font.heading);
             this.status.followed.forEach((f)=>{
                 console.log(`%c${f.person.personName}: ${f.person.personLink}`, "font-weight:bold; font-size:8px;");
             })
@@ -405,21 +408,23 @@ class Instabot {
                 if(input){
                     const lastValue = input.value;
                     const comment = 
-                        (tags.hasF4F)
+                        (tags.hasF4F && this.options.isFollowing)
                         ? this.generateRandomComment(f4fcom)
                         :(tags.hasL4L)
                         ? this.generateRandomComment(l4lcom)
                         :null;
-                    const emoji = this.generateRandomComment(this.comments.emoji)
-                    this.post.comment = comment + emoji;
-                    input.value = this.post.comment;
-                    const event = new Event('change', { bubbles: true });
-                    event.simulated = true;
-                    const tracker = input._valueTracker;
-                    if (tracker) {
-                        tracker.setValue(lastValue);
+                    if(comment != null){
+                        const emoji = this.generateRandomComment(this.comments.emoji)
+                        this.post.comment = comment + emoji;
+                        input.value = this.post.comment;
+                        const event = new Event('change', { bubbles: true });
+                        event.simulated = true;
+                        const tracker = input._valueTracker;
+                        if (tracker) {
+                            tracker.setValue(lastValue);
+                        }
+                        input.dispatchEvent(event);
                     }
-                    input.dispatchEvent(event);
                     return resolve();
                 } else {
                     console.log(`%cCommenting failed`,this.font.small);
@@ -490,6 +495,7 @@ class Instabot {
                     .then(()=>{
                         if(followbtn){
                             followbtn.click();
+                            this.post.followed = true;
                             this.status.followed.push(this.post);
                             console.log(`%cFollowed: ${this.post.person.personLink}`,this.font.heading);
                             resolve();
@@ -533,12 +539,12 @@ class Instabot {
         console.log(`%c Current liked : ${this.status.liked.length + this.status.archivedLiked.length}`,this.font.small)
         console.log(`%c Current followed : ${this.status.followed.length + this.status.archivedFollowed.length}`,this.font.small)
         if(this.status.archivedFollowed.length>0){
-            this.actions.archivedFollowed.forEach((f)=>{
+            this.status.archivedFollowed.forEach((f)=>{
                 console.log(`%c${f.personName}: ${f.personLink}`,this.font.small);
             })
         }
         if(this.status.followed.length>0){
-            this.actions.followed.forEach((f)=>{
+            this.status.followed.forEach((f)=>{
                 console.log(`%c${f.personName}: ${f.personLink}`,this.font.small);
             })
         }
@@ -624,6 +630,14 @@ class InstabotUI {
             popup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popupInner: "overflow:scroll;width:100%;height:100%",
             popupClose: "position:absolute; right:10px; top:10px;",
+            ul: "display:flex;flex-flow:row wrap;margin-top:40px;box-sizing:border-box;",
+            li: "display:flex;flex-flow:column;justify-content:space-between;width:25%;padding:1em;",
+            person: "display:flex;justify-content:space-between;align-items:center;flex-flow:row;width:100%;margin-bottom:1em;",
+            personImage : "width:50px; height:50px;border-radius:50%;",
+            personFollowed: "color:teal;font-size:8px;",
+            personNotFollowed: "color:tomato;font-size:8px;",
+            postImage: "width:100%; height:auto;",
+            postCommented: "font-size:8px;color:grey;",
             btn : {
                 blue : "background:dodgerblue;color:white;outline:none;border-radius:5px;border:none;padding:5px 10px;margin-top:5px;",
                 red : "background:tomato;color:white;outline:none;border-radius:5px;border:none;padding:5px 10px;margin-top:5px;",
@@ -641,15 +655,22 @@ class InstabotUI {
             parent:document.body,
         },el=>el)
 
-        this.toggleFollowingBtn(left);
-        this.toggleIncludeTopBtn(left);
-        this.toggleFilterBtn(left);
-        this.statusBtn(left);
-        this.showLiked(left);
+        const togglefollowbtn = this.toggleFollowingBtn(left);
+        const toggleincludebtn = this.toggleIncludeTopBtn(left);
+        const togglefilterbtn = this.toggleFilterBtn(left);
+        const statusbtn = this.statusBtn(left);
+        const showlikedbtn = this.showLiked(left);
 
-        this.getUnfollowersBtn(right);
-        this.likeAllBtn(right);
-        this.startBtn(right);
+        const getunfollowersbtn = this.getUnfollowersBtn(right);
+        const likeallbtn = this.likeAllBtn(right);
+        const startbtn = this.startBtn(right);
+
+        document.addEventListener('keydown',function(e){
+            if(e.keyCode == '13'){
+                e.preventDefault();
+                startbtn.click();
+            }
+        })
     }
     createElement({ id, type,text,style,parent }, cb){
         const el = document.createElement(type);
@@ -687,7 +708,9 @@ class InstabotUI {
                     })
                 })
             })
+            return p;
         })
+        return popup;
     }
     startBtn(parent){
         const self = this;
@@ -710,6 +733,7 @@ class InstabotUI {
                 }
                 this.classList.toggle('started');
             })
+            return b;
         })
         return btn;
     }
@@ -725,6 +749,7 @@ class InstabotUI {
             b.addEventListener('click',function(){
                 self.instabot.likeAll();
             })
+            return b;
         })
         return btn;
     }
@@ -740,6 +765,7 @@ class InstabotUI {
             b.addEventListener('click',function(){
                 self.instabot.getUnfollowers();
             })
+            return b;
         })
         return btn;
     }
@@ -755,6 +781,7 @@ class InstabotUI {
             b.addEventListener('click',function(){
                 self.instabot.getStatus();
             })
+            return b;
         })
         return btn;
     }
@@ -768,8 +795,27 @@ class InstabotUI {
             parent,
         },b=>{
             b.addEventListener('click',function(){
-                self.createPopup('Lets show the list');
+                const liked = [ ...self.instabot.status.liked , ...self.instabot.status.archivedLiked];
+                const html = `
+                <ul style="${self.style.ul}">
+                    ${liked.map((t)=>( 
+                        `<li style="${self.style.li}">
+                            <div style="${self.style.person}">
+                                <span style=${(t.followed)?self.style.personFollowed:self.style.personNotFollowed}>${(t.followed)?"Followed":"Not Following"}</span>
+                                <a href="${t.person.personLink}" target="_blank">${t.person.personName}</a>
+                                <img style="${self.style.personImage}" src="${t.person.personImage}"/>
+                            </div>
+                            <a href="${t.src}" target="_blank">
+                                <img style="${self.style.postImage}" src="${t.image.src}"/>
+                            </a>
+                            <p style="${self.style.postCommented}">${(t.comment != null)? `Comment: ${t.comment}` :"Not commented"}</p>
+                        </li>`
+                    )).join('')}
+                </ul>
+                `
+                self.createPopup(html);
             })
+            return b;
         })
         return btn;
     }
@@ -794,6 +840,7 @@ class InstabotUI {
                 }
                 this.classList.toggle('off');
             })
+            return b;
         })
         return btn;
     }
@@ -818,6 +865,7 @@ class InstabotUI {
                 }
                 this.classList.toggle('off');
             })
+            return b;
         })
         return btn;
     }
@@ -842,6 +890,7 @@ class InstabotUI {
                 }
                 this.classList.toggle('off');
             })
+            return b;
         })
         return btn;
     }
@@ -850,3 +899,4 @@ class InstabotUI {
 const instabot = new Instabot();
 const UI = new InstabotUI(instabot);
 UI.init()
+clear();
