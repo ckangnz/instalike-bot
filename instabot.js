@@ -15,7 +15,7 @@ class Instabot {
         this.element = {
             popup: 'div._2dDPU.vCf6V[role=dialog]',
             name : 'a.notranslate:first-child',
-            personImage: 'a._2dbep.qNELH.kIKUG img',
+            personImage: 'article ._2dbep img',
             image: 'article div[role=button] .KL4Bh img.FFVAD',
             post: "a[href*='/p/']:not(.zV_Nj)",
             recentPost : '.yQ0j1:nth-child(2) ~ div a[href*="/p/"]:not(.zV_Nj)',
@@ -109,12 +109,12 @@ class Instabot {
     }
     archive(){
         if(this.status.liked.length > 0 ){
-            this.status.archivedLiked.push(this.status.liked);
+            this.status.archivedLiked = [...this.status.liked, ...this.status.archivedLiked];
             console.log(`%cArchiving likes`,this.font.small);
             this.status.liked = [];
         }
         if(this.status.followed.length > 0 ){
-            this.status.archivedFollowed.push(this.status.followed);
+            this.status.archivedFollowed = [...this.status.followed, ...this.status.archivedFollowed ];
             console.log(`%cArchiving follows`,this.font.small);
             this.status.followed = [];
         }
@@ -153,6 +153,10 @@ class Instabot {
     nextImage(){
         if(this.status.liked.length >= this.conditions.maxLiked) { 
             console.log(`%cYou have already liked ${this.conditions.maxLiked} images. Restarting will reset`,this.font.heading);
+            this.stop();
+        }  
+        if(this.status.followed.length >= this.conditions.maxFollows) { 
+            console.log(`%cYou have already followed ${this.conditions.maxFollows} followers. Restarting will reset`,this.font.heading);
             this.stop();
         }  
         if(
