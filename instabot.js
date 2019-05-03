@@ -44,6 +44,7 @@ class Instabot {
             archivedFollowed:[],
             unfollowers:[],
             inProgress: false,
+            logs:[],
         }
         this.options = {
             includeTop : true,
@@ -100,29 +101,45 @@ class Instabot {
     generateRandomComment(c){
         return c[Math.floor(Math.random()*c.length)] 
     }
+    clearLogger(){
+        this.status.logs = [];
+        this.updateLogBox(this.status.logs);
+    }
+    logger(text,style){
+        const log = `<p style="${style}">${text}</p>`;
+        this.status.logs.push(log);
+        this.updateLogBox(this.status.logs);
+    }
+    updateLogBox(logs){
+        const logbox = document.getElementById('LogBox');
+        logbox.innerHTML = logs.join('');
+        if(logbox.className != 'hovered'){
+            logbox.scrollTop = logbox.scrollHeight;
+        }
+    }
     init(){
         this.status.inProgress = true;
         this.time.start = performance.now();
         this.archive();
         this.openPost()
-        console.log(`%c>>>>>>>INITIATING INSTABOT....<<<<<<<`,this.font.heading);
+        this.logger(`>>>>>>>INITIATING INSTABOT....<<<<<<<`,this.font.heading);
         this.delay(this.time.delayInitial)
             .then(()=> this.analyzePost() )
     }
     archive(){
         if(this.status.liked.length > 0 ){
             this.status.archivedLiked = [...this.status.liked, ...this.status.archivedLiked];
-            console.log(`%cArchiving likes`,this.font.small);
+            this.logger(`Archiving likes`,this.font.small);
             this.status.liked = [];
         }
         if(this.status.followed.length > 0 ){
             this.status.archivedFollowed = [...this.status.followed, ...this.status.archivedFollowed ];
-            console.log(`%cArchiving follows`,this.font.small);
+            this.logger(`Archiving follows`,this.font.small);
             this.status.followed = [];
         }
     }
     stop(){
-        console.log(`%c....stopping the process... please wait....`,this.font.small);
+        this.logger(`....stopping the process... please wait....`,this.font.small);
         this.status.inProgress = false;
     }
     openPost(){
@@ -135,7 +152,7 @@ class Instabot {
     }
     analyzePost(){
         if(this.status.inProgress){
-            console.log(`%c===========================================`,'background:black;');
+            this.logger(`===========================================`,'background:black;');
             this.resetPost()
                 .then(()=> this.getName())
                 .then(()=> this.getNumberOfLikes())
@@ -154,11 +171,11 @@ class Instabot {
     }
     nextImage(){
         if(this.status.liked.length >= this.conditions.maxLiked) { 
-            console.log(`%cYou have already liked ${this.conditions.maxLiked} images. Restarting will reset`,this.font.heading);
+            this.logger(`You have already liked ${this.conditions.maxLiked} images. Restarting will reset`,this.font.heading);
             this.stop();
         }  
         if(this.status.followed.length >= this.conditions.maxFollows) { 
-            console.log(`%cYou have already followed ${this.conditions.maxFollows} followers. Restarting will reset`,this.font.heading);
+            this.logger(`You have already followed ${this.conditions.maxFollows} followers. Restarting will reset`,this.font.heading);
             this.stop();
         }  
         if(
@@ -167,19 +184,19 @@ class Instabot {
         ){
             const nextbtn = document.querySelector(this.element.nextBtn);
             nextbtn ? nextbtn.click() : true;
-            console.log(`%cLiked ${this.status.liked.length} images. (max:${this.conditions.maxLiked})`,this.font.small);
-            console.log(`%cFollowed ${this.status.followed.length} people (max:${this.conditions.maxFollows})`,this.font.small);
-            console.log(`%cTime remaining: ${ Math.round((this.time.maxDuration - (performance.now() - this.time.start))/this.min*10)/10} minutes`,this.font.small);
-            console.log('%c====NEXT====>',this.font.heading);
+            this.logger(`Liked ${this.status.liked.length} images. (max:${this.conditions.maxLiked})`,this.font.small);
+            this.logger(`Followed ${this.status.followed.length} people (max:${this.conditions.maxFollows})`,this.font.small);
+            this.logger(`Time remaining: ${ Math.round((this.time.maxDuration - (performance.now() - this.time.start))/this.min*10)/10} minutes`,this.font.small);
+            this.logger('====NEXT====>',this.font.heading);
             this.delay(this.time.delayInitial)
                 .then(()=>this.checkEndOfPost())
                 .then(()=>this.analyzePost())
         } else {
-            console.log(`%cTotal Like count: ${this.status.liked.length} images`,this.font.small);
-            console.log(`%cTotal Follow count: ${this.status.followed.length}`,this.font.small);
-            console.log(`%c>>>>>>FINISHED<<<<<<`,this.font.heading);
+            this.logger(`Total Like count: ${this.status.liked.length} images`,this.font.small);
+            this.logger(`Total Follow count: ${this.status.followed.length}`,this.font.small);
+            this.logger(`>>>>>>FINISHED<<<<<<`,this.font.heading);
             this.status.followed.forEach((f)=>{
-                console.log(`%c${f.person.personName}: ${f.person.personLink}`, "font-weight:bold; font-size:8px;");
+                this.logger(`<a target="_blank" href="${f.person.personLink}">${f.person.personName}</a> `,this.font.small);
             })
             document.querySelector(this.element.postCloseBtn).click();
         }
@@ -187,7 +204,7 @@ class Instabot {
     checkEndOfPost(){
         return new Promise(resolve=>{
             if(this.post.src == window.location.href){
-                console.log(`%cEnd of posts`,this.font.heading)
+                this.logger(`End of posts`,this.font.heading)
                 var evt = new KeyboardEvent('keydown', {'keyCode':222, 'which':222});
                 document.dispatchEvent(evt);
             }
@@ -209,7 +226,7 @@ class Instabot {
                     personLink : document.querySelector(this.element.name).href,
                     personImage: document.querySelector(this.element.personImage).src,
                 }
-                : console.log(`%cCouldn't load name. Retrying...`,'font-size:8px; color:red!important;') 
+                : this.logger(`Couldn't load name. Retrying...`,this.font.error) 
                 && this.waitFor(delay,()=>document.querySelector(this.element.name) != null 
                     ? {
                         personName : document.querySelector(this.element.name).innerText,
@@ -324,47 +341,46 @@ class Instabot {
             } = this.post;
 
             if(person == null){
-                console.log(`%cCouldn't load the person`, this.font.error)
+                this.logger(`Couldn't load the person`, this.font.error)
                 return resolve(false);
             } else {
-                console.log(`%c ID: ${person.personName}`,this.font.heading)
-                console.log(`%c${person.personLink}`,this.font.small)
-                console.log(`%cCurrent post : ${src}`,this.font.small)
+                this.logger(`ID: <a target="_blank" href="${person.personLink}">${person.personName}</a>`,this.font.heading)
+                this.logger(`Current post: <a target="_blank" href=${src}"">${src}</a>`,this.font.small)
             }
 
             if(liked){
-                console.log(`%cAlready liked.`,this.font.error);
+                this.logger(`Already liked.`,this.font.error);
                 return resolve(false);
             } 
             if(!this.options.isFiltering){
-                console.log(`%cFiltering OFF. Skipping Validation.`, this.font.small)
+                this.logger(`Filtering OFF. Skipping Validation.`, this.font.small)
                 return resolve(true);
             }
             if (followed){
-                console.log(`%cAlready followed.`,this.font.error);
+                this.logger(`Already followed.`,this.font.error);
                 return resolve(false);
             }
 
             if(numberOfLikes < this.conditions.minLikes){
-                console.log(`%cNot enough likes`, this.font.error)
+                this.logger(`Not enough likes`, this.font.error)
                 return resolve(false);
             } else if (numberOfLikes > this.conditions.maxLikes){
-                console.log(`%cToo many likes`, this.font.error)
+                this.logger(`Too many likes`, this.font.error)
                 return resolve(false);
             } else {
-                console.log(`%cPassed like filter : ${this.options.minLikes} < ${numberOfLikes} < ${this.options.maxLikes}`,this.font.pass);
+                this.logger(`Passed like filter : ${this.options.minLikes} < ${numberOfLikes} < ${this.options.maxLikes}`,this.font.pass);
             } 
 
             if( tags.hasTag.length == 0 ){
-                console.log(`%cNo Matching tags.`,this.font.error);
+                this.logger(`No Matching tags.`,this.font.error);
                 return resolve(false);
             } else if( tags.hasExcludes.length > 0 ){
                 const unwantedTags = tags.hasExcludes.join(',');
-                console.log(`%cFound unwanted tags:`,this.font.error, unwantedTags);
+                this.logger(`Found unwanted tags:${unwantedTags}`,this.font.error);
                 return resolve(false);
             } else {
                 const wantedTags = tags.hasTag.join(',');
-                console.log(`%cFound ${tags.hasTag.length} matching tags:`,this.font.pass, wantedTags);
+                this.logger(`Found ${tags.hasTag.length} matching tags:${wantedTags}`,this.font.pass);
             } 
 
             return resolve(true);
@@ -373,9 +389,9 @@ class Instabot {
     processPost(isValid){
         return new Promise(resolve=>{
             if(isValid && this.status.inProgress){
-                console.log(`%c......processing......`,this.font.small);
+                this.logger(`......processing......`,this.font.small);
                 (!this.options.isFiltering)
-                    ? console.log(`%c Filtering is OFF.`,this.font.override)
+                    ? this.logger(`Filtering is OFF.`,this.font.override)
                     :null;
                 this.likePost()
                     .then(()=> this.writeComment())
@@ -383,20 +399,20 @@ class Instabot {
                     .then(()=> this.follow())
                     .then(()=>resolve())
             } else {
-                console.log(`%cProcess Skipped`,this.font.error);
+                this.logger(`Process Skipped`,this.font.error);
                 return resolve();
             }
         })
     }
     likePost(){
         return new Promise(resolve=>{
-            console.log(`%c..liking post..`,this.font.small);
+            this.logger(`..liking post..`,this.font.small);
             this.delay(this.time.delayLike)
                 .then(()=>{
                     this.post.likeBtn.click();
                     this.post.liked = true;
                     this.status.liked.push(this.post);
-                    console.log(`%cLiked post`,this.font.heading);
+                    this.logger(`Liked post`,this.font.heading);
                     return resolve();
                 })
         })
@@ -441,18 +457,18 @@ class Instabot {
                     }
                     return resolve();
                 } else {
-                    console.log(`%cCommenting failed`,this.font.small);
+                    this.logger(`Commenting failed`,this.font.small);
                     return resolve();
                 }
             } else {
                 (!this.options.isFiltering)
                     ?null
                     :(!liked)
-                    ?console.log(`%c Skipping comments. Not liked`,this.font.error)
+                    ?this.logger(`Skipping comments. Not liked`,this.font.error)
                     :(!image.isSafe)
-                    ?console.log(`%c Skipping comments. Image not safe`,this.font.error)
+                    ?this.logger(`Skipping comments. Image not safe`,this.font.error)
                     :(!tags.hasF4F && !tags.hasL4L)
-                    ?console.log(`%c Skipping comments. Missing required tags`,this.font.error)
+                    ?this.logger(`Skipping comments. Missing required tags`,this.font.error)
                     :null;
                 return resolve();
             }
@@ -466,22 +482,22 @@ class Instabot {
             ){
                 const btn = document.querySelector(this.element.commentPostBtn);
                 if(btn){
-                    console.log(`%c..posting comment..`,this.font.small)
+                    this.logger(`..posting comment..`,this.font.small)
                     this.delay(this.time.delayComment)
                         .then(()=>{
                             btn.click() 
-                            console.log(`%cPosted comment: "${this.post.comment}"`,this.font.heading)
+                            this.logger(`Posted comment: "${this.post.comment}"`,this.font.heading)
                             return resolve() 
                         })
                 } else {
-                    console.log(`%cComment button missing`,this.font.error);
+                    this.logger(`Comment button missing`,this.font.error);
                     return resolve();
                 }
             }else{
                 (!this.options.isFiltering)
                     ?null 
                     :(this.post.comment == null)
-                    ? console.log(`%cComment missing`,this.font.error)
+                    ? this.logger(`Comment missing`,this.font.error)
                     :null;
                 return resolve(false);
             }
@@ -504,14 +520,14 @@ class Instabot {
                 && !followed
                 && this.conditions.maxFollows >= this.status.followed.length
             ){
-                console.log(`%c..Following..`,this.font.small);
+                this.logger(`..Following..`,this.font.small);
                 this.delay(this.time.delayFollow)
                     .then(()=>{
                         if(followbtn){
                             followbtn.click();
                             this.post.followed = true;
                             this.status.followed.push(this.post);
-                            console.log(`%cFollowed: ${this.post.person.personLink}`,this.font.heading);
+                            this.logger(`Followed: <a target="_blank" href="${this.post.person.personLink}">${this.post.person.personLink}</a>`,this.font.heading);
                             resolve();
                         }
                         resolve();
@@ -520,15 +536,15 @@ class Instabot {
                 (!this.options.isFiltering)
                     ? null
                     :(this.conditions.maxFollows <= this.status.followed.length)
-                    ? console.log(`%c Skipping follow. Maximum follows reached`,this.font.error)
+                    ? this.logger(`Skipping follow. Maximum follows reached`,this.font.error)
                     :(!this.options.isFollowing)
-                    ? console.log(`%c Following option turned off`,this.font.override)
+                    ? this.logger(`Following option turned off`,this.font.override)
                     :(followed)
-                    ? console.log(`%c Already following.`,this.font.small)
+                    ? this.logger(`Already following.`,this.font.small)
                     :(!comment)
-                    ? console.log(`%c Skipping follow. Not commented`,this.font.error)
+                    ? this.logger(`Skipping follow. Not commented`,this.font.error)
                     :(!tags.hasF4F)
-                    ? console.log(`%c Skipping follow. Missing required tags.`,this.font.error)
+                    ? this.logger(`Skipping follow. Missing required tags.`,this.font.error)
                     :null;
                 return resolve();
             }
@@ -545,16 +561,16 @@ class Instabot {
             return this.indexOf(f) == -1;
         },followers)
         this.status.unfollowers.push(unfollowers);
-        console.log(`%cYou have ${unfollowers.length} people who are not following back:`,this.font.heading)
+        this.logger(`You have ${unfollowers.length} people who are not following back:`,this.font.heading)
         unfollowers.forEach((f)=>{
-            console.log(`%c ${f} :  https://www.instagram.com/${f}`,this.font.small)
+            this.logger(`${f} :  https://www.instagram.com/${f}`,this.font.small)
         })
         return unfollowers;
     }
     async loadFollowers(loadingFollowings){
         (loadingFollowings)
-            ?console.log(`%c...loading followings...`,this.font.small)
-            :console.log(`%c ...loading followers ...`, this.font.small)
+            ?this.logger(`...loading followings...`,this.font.small)
+            :this.logger(`...loading followers ...`, this.font.small)
         return new Promise(async resolve => {
             const flBtn = document.querySelectorAll(this.element.followersBtn);
             (loadingFollowings)
@@ -580,7 +596,7 @@ class Instabot {
                         return p.innerText
                     })
                     document.querySelector(this.element.followerPopupCloseBtn).click()
-                    console.log(`%cFinished collecting`,'font-size:8px;color:grey;');
+                    this.logger(`Finished collecting`,'font-size:8px;color:grey;');
                     setTimeout(()=>resolve(list),1000)
                 }
             }, 1000)
@@ -594,31 +610,31 @@ class Instabot {
     toggleIncludeTop(){
         this.options.includeTop = !this.options.includeTop;
         this.options.includeTop
-            ? console.log(`%c Start from Top`,this.font.pass)
-            : console.log(`%c Start from Recent`,this.font.error)
+            ? this.logger(`Start from Top`,this.font.pass)
+            : this.logger(`Start from Recent`,this.font.error)
     }
     toggleFilter(){
         this.options.isFiltering = !this.options.isFiltering;
         this.options.isFiltering
-            ? console.log(`%c Filtering turned ON`,this.font.pass)
-            : console.log(`%c Filtering turned OFF`,this.font.error)
+            ? this.logger(`Filtering turned ON`,this.font.pass)
+            : this.logger(`Filtering turned OFF`,this.font.error)
     }
     toggleFollowing(){
         this.options.isFollowing = !this.options.isFollowing;
         this.options.isFollowing
-            ? console.log(`%c Following ON`,this.font.pass)
-            : console.log(`%c Following OFF`,this.font.error)
+            ? this.logger(`Following ON`,this.font.pass)
+            : this.logger(`Following OFF`,this.font.error)
     }
 }
-
 class InstabotUI {
     constructor(instabot){
         this.instabot = instabot;
         this.style = {
             left : "position:fixed;bottom:10px;left:10px;padding:15px;z-index:99;",
             right: "position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;",
+            logger: "position:fixed;bottom:10px;left:50%;transform:translateX(-50%);width:60%;overflow-y:auto;height:200px;padding:15px;background:white;z-index:99;border-radius:5px;resize:vertical;",
             popup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
-            popupInner: "overflow:scroll;width:100%;height:100%",
+            popupInner: "overflow:auto;width:100%;height:100%",
             popupClose: "position:fixed; right:2em; top:1em;border:none;border-radius:5px;color:white;background:black;",
             ul: "display:flex;flex-flow:row wrap;margin-top:40px;box-sizing:border-box;",
             li: "display:flex;flex-flow:column;justify-content:space-between;width:25%;padding:1em;box-sizing:border-box;",
@@ -626,7 +642,7 @@ class InstabotUI {
             personImage : "width:50px; height:50px;border-radius:50%;",
             personFollowed: "color:teal;font-size:8px;",
             personNotFollowed: "color:tomato;font-size:8px;",
-            postImage: "width:100%; height:auto;",
+            postImage: "width:100%;min-width:30px;min-height:30px;background:lightgrey;height:auto;",
             postCommented: "font-size:8px;color:grey;",
             heading:"font-size:25px;font-weight:bold;margin-bottom:1em;",
             subheading:"font-size:15px;font-weight:bold;",
@@ -642,19 +658,31 @@ class InstabotUI {
     }
     init(){
         const left = this.createElement({
-            type:"div", text:"", style:this.style.left,
+            id:'LeftPanel', type:"div", text:"", style:this.style.left,
             parent:document.body,
         },el=>el)
         const right = this.createElement({
-            type:"div", text:"", style:this.style.right,
+            id:'RightPanel', type:"div", text:"", style:this.style.right,
             parent:document.body,
         },el=>el)
+        const logger = this.createElement({
+            id:'LogBox', type:'div', text:"", style:this.style.logger,
+            parent:document.body,
+        },logbox=>{
+            logbox.addEventListener('mouseenter',function(){
+                logbox.classList.add('hovered');
+            })
+            logbox.addEventListener('mouseleave',function(){
+                logbox.classList.remove('hovered');
+            })
+        })
 
         const togglefollowbtn = this.toggleFollowingBtn(left);
         const toggleincludebtn = this.toggleIncludeTopBtn(left);
         const togglefilterbtn = this.toggleFilterBtn(left);
         const statusbtn = this.statusBtn(left);
-        const showlikedbtn = this.showLiked(left);
+        const showlikedbtn = this.showLikedBtn(left);
+        const clearlogbtn = this.clearLogBtn(left);
 
         const getunfollowersbtn = this.getUnfollowersBtn(right);
         const likeallbtn = this.likeAllBtn(right);
@@ -734,6 +762,22 @@ class InstabotUI {
         }
         btn.classList.toggle('started');
     }
+    clearLogBtn(parent){
+        const self = this;
+        const btn = this.createElement({
+            id:'ClearLogBtn',
+            type:'button',
+            text:"Clear logs",
+            style: this.style.btn.red,
+            parent,
+        },b=>{
+            b.addEventListener('click',function(){
+                self.instabot.clearLogger();
+            })
+            return b;
+        })
+        return btn;
+    }
     likeAllBtn(parent){
         const self = this;
         const btn = this.createElement({
@@ -787,6 +831,7 @@ class InstabotUI {
         },b=>{
             b.addEventListener('click',function(){
                 const b = self.instabot;
+                b.getStatus();
                 const html = `
                 <div style="margin-top:30px;">
                     <div style="padding:1em;">
@@ -816,14 +861,14 @@ class InstabotUI {
                         <h3 style="${self.style.subheading}">Current followed:</h3>
                         <p style="margin-bottom:5px;">${b.status.followed.length + b.status.archivedFollowed.length}</p>
                         ${b.status.archivedFollowed.length>0
-                        ?`${b.status.archivedFollowed.foreach((f)=>{
-                            `<p><a href="${f.personLink}">${f.personName}</a></p>`
-                        })}`
+                        ?`${b.status.archivedFollowed.map((f)=>(
+                            `<p><a target="_blank" href="${f.personLink}">${f.personName}</a></p>`
+                        ))}`
                         :``}
                         ${b.status.followed.length>0
-                        ?`${b.status.followed.foreach((f)=>{
-                            `<p><a href="${f.personLink}">${f.personName}</a></p>`
-                        })}`
+                        ?`${b.status.followed.map((f)=>(
+                            `<p><a target="_blank" href="${f.personLink}">${f.personName}</a></p>`
+                        ))}`
                         :``}
                     </div>
                 </div>
@@ -834,7 +879,7 @@ class InstabotUI {
         })
         return btn;
     }
-    showLiked(parent){
+    showLikedBtn(parent){
         const self = this;
         const btn = this.createElement({
             id:'ShowLikedBtn',
@@ -854,10 +899,10 @@ class InstabotUI {
                                 <a href="${t.person.personLink}" target="_blank">${t.person.personName}</a>
                                 <img style="${self.style.personImage}" src="${t.person.personImage}"/>
                             </div>
-                            <a href="${t.src}" target="_blank">
+                            <a style="text-align:center;"href="${t.src}"target="_blank">
                                 <img style="${self.style.postImage}" src="${t.image.src}"/>
                             </a>
-                            <p style="${self.style.postCommented}">${(t.comment != null)? `Comment: ${t.comment}` :"Not commented"}</p>
+                            <p style="${self.style.postCommented}">${(t.comment != null)? `Comment: ${t.comment}`:"Not commented"}</p>
                         </li>`
                     )).join('')}
                 </ul>
@@ -944,7 +989,6 @@ class InstabotUI {
         return btn;
     }
 }
-
 const instabot = new Instabot();
 const UI = new InstabotUI(instabot);
 UI.init()
