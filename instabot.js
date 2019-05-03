@@ -560,6 +560,7 @@ class Instabot {
         unfollowers.forEach((f)=>{
             console.log(`%c ${f} :  https://www.instagram.com/${f}`,this.font.small)
         })
+        return unfollowers;
     }
     async loadFollowers(loadingFollowings){
         (loadingFollowings)
@@ -629,7 +630,7 @@ class InstabotUI {
             right: "position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;",
             popup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popupInner: "overflow:scroll;width:100%;height:100%",
-            popupClose: "position:absolute; right:10px; top:10px;",
+            popupClose: "position:fixed; right:2em; top:1em;border:none;border-radius:5px;color:white;background:black;",
             ul: "display:flex;flex-flow:row wrap;margin-top:40px;box-sizing:border-box;",
             li: "display:flex;flex-flow:column;justify-content:space-between;width:25%;padding:1em;",
             person: "display:flex;justify-content:space-between;align-items:center;flex-flow:row;width:100%;margin-bottom:1em;",
@@ -762,8 +763,18 @@ class InstabotUI {
             style: this.style.btn.green,
             parent,
         },b=>{
-            b.addEventListener('click',function(){
-                self.instabot.getUnfollowers();
+            b.addEventListener('click',async function(){
+                const unfollowers = await self.instabot.getUnfollowers();
+                const html = `
+                <ul style="margin-top:40px;">
+                    ${unfollowers.map((t)=>( 
+                        `<li style="padding:1em;">
+                            <a href="https://www.instagram.com/${t}" target="_blank">https://www.instagram.com/${t}</a>
+                        </li>`
+                    )).join('')}
+                </ul>
+                `
+                self.createPopup(html);
             })
             return b;
         })
