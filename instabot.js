@@ -269,7 +269,7 @@ class Instabot {
     getImage(){
         return new Promise(resolve=>{
             const image = document.querySelector(this.element.image); 
-            const src = image ? image.currentSrc : null
+            const src = image ? image.currentSrc : image ? image.src : null
             const alt = image ? image.alt : null
             const isSafe = (alt!=null)
                 ?  this.conditions.imageAlt.some((v)=> {
@@ -432,7 +432,7 @@ class Instabot {
                 }
             } else {
                 (!this.options.isFiltering)
-                    ?console.log(`%c Skipping comments. Filtering OFF`,this.font.override)
+                    ?null
                     :(!liked)
                     ?console.log(`%c Skipping comments. Not liked`,this.font.error)
                     :(!image.isSafe)
@@ -465,7 +465,7 @@ class Instabot {
                 }
             }else{
                 (!this.options.isFiltering)
-                    ? console.log(`%c Skipping Comments submit Filtering OFF`,this.font.override)
+                    ?null 
                     :(this.post.comment == null)
                     ? console.log(`%cComment missing`,this.font.error)
                     :null;
@@ -504,7 +504,7 @@ class Instabot {
                     })
             } else {
                 (!this.options.isFiltering)
-                    ? console.log(`%c Skipping follow. Filtering OFF`,this.font.override)
+                    ? null
                     :(this.conditions.maxFollows <= this.status.followed.length)
                     ? console.log(`%c Skipping follow. Maximum follows reached`,this.font.error)
                     :(!this.options.isFollowing)
