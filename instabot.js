@@ -666,10 +666,11 @@ class InstabotUI {
         const likeallbtn = this.likeAllBtn(right);
         const startbtn = this.startBtn(right);
 
+        const self = this;
         document.addEventListener('keydown',function(e){
-            if(e.keyCode == '13'){
+            if(e.keyCode == '222'){
                 e.preventDefault();
-                startbtn.click();
+                self.startBtnClicked(startbtn);
             }
         })
     }
@@ -718,25 +719,26 @@ class InstabotUI {
         const btn = this.createElement({
             id:'StartBtn',
             type:'button',
-            text:"Start Instabot",
+            text:"Start instabot (')",
             style: self.style.btn.green,
             parent,
         },b=>{
-            b.addEventListener('click',function(){
-                if(this.className == 'started'){
-                    self.instabot.stop();
-                    this.innerText="Start Instabot";
-                    this.style = self.style.btn.green;
-                } else {
-                    self.instabot.init();
-                    this.innerText = "Stop Instabot";
-                    this.style = self.style.btn.red;
-                }
-                this.classList.toggle('started');
-            })
+            b.addEventListener('click',()=>this.startBtnClicked(b))
             return b;
         })
         return btn;
+    }
+    startBtnClicked(btn){
+        if(btn.className == 'started'){
+            this.instabot.stop();
+            btn.innerText="Start instabot (')";
+            btn.style = this.style.btn.green;
+        } else {
+            this.instabot.init();
+            btn.innerText = "Stop instabot (')";
+            btn.style = this.style.btn.red;
+        }
+        btn.classList.toggle('started');
     }
     likeAllBtn(parent){
         const self = this;
