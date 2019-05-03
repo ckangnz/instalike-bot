@@ -89,6 +89,7 @@ class Instabot {
         }
         this.font ={
             heading: 'font-size:12px; font-weight:bold;',
+            link: 'color:deepskyblue;',
             small : 'font-size:8px;',
             override:'font-size:8px;important;background:rgba(30,144,255,0.3);',
             pass:'font-size:8px;important;background:rgba(0,256,0,0.3);',
@@ -139,7 +140,7 @@ class Instabot {
         }
     }
     stop(){
-        this.logger(`....stopping the process... please wait....`,this.font.small);
+        this.logger(`>>>>>>>Stopping the process. Please wait....<<<<`,this.font.heading+this.font.override);
         this.status.inProgress = false;
     }
     openPost(){
@@ -152,7 +153,7 @@ class Instabot {
     }
     analyzePost(){
         if(this.status.inProgress){
-            this.logger(`===========================================`,'background:black;');
+            this.logger(`===========================================`,this.font.small);
             this.resetPost()
                 .then(()=> this.getName())
                 .then(()=> this.getNumberOfLikes())
@@ -196,7 +197,7 @@ class Instabot {
             this.logger(`Total Follow count: ${this.status.followed.length}`,this.font.small);
             this.logger(`>>>>>>FINISHED<<<<<<`,this.font.heading);
             this.status.followed.forEach((f)=>{
-                this.logger(`<a target="_blank" href="${f.person.personLink}">${f.person.personName}</a> `,this.font.small);
+                this.logger(`<a style="${this.font.link}" target="_blank" href="${f.person.personLink}">${f.person.personName}</a> `,this.font.small);
             })
             document.querySelector(this.element.postCloseBtn).click();
         }
@@ -344,8 +345,8 @@ class Instabot {
                 this.logger(`Couldn't load the person`, this.font.error)
                 return resolve(false);
             } else {
-                this.logger(`ID: <a target="_blank" href="${person.personLink}">${person.personName}</a>`,this.font.heading)
-                this.logger(`Current post: <a target="_blank" href=${src}"">${src}</a>`,this.font.small)
+                this.logger(`ID: <a style="${this.font.link}" target="_blank" href="${person.personLink}">${person.personName}</a>`,this.font.heading)
+                this.logger(`Current post: <a style="${this.font.link}" target="_blank" href=${src}"">${src}</a>`,this.font.small)
             }
 
             if(liked){
@@ -527,7 +528,7 @@ class Instabot {
                             followbtn.click();
                             this.post.followed = true;
                             this.status.followed.push(this.post);
-                            this.logger(`Followed: <a target="_blank" href="${this.post.person.personLink}">${this.post.person.personLink}</a>`,this.font.heading);
+                            this.logger(`Followed: <a style="${this.font.link}" style="${this.font.link}" target="_blank" href="${this.post.person.personLink}">${this.post.person.personLink}</a>`,this.font.heading);
                             resolve();
                         }
                         resolve();
@@ -633,7 +634,7 @@ class InstabotUI {
         this.style = {
             left : "position:fixed;bottom:10px;left:10px;padding:15px;z-index:99;",
             right: "position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;",
-            logger: "position:fixed;bottom:10px;left:50%;transform:translateX(-50%);width:60%;overflow-y:auto;height:200px;padding:15px;background:white;z-index:99;border-radius:5px;resize:vertical;",
+            logger: "position:fixed;top:50px;left:0;width:30%;overflow-y:auto;height:200px;padding:15px;color:white;background:#252525;z-index:99;border-radius:5px;resize:vertical;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popupInner: "overflow:auto;width:100%;height:100%",
             popupClose: "position:fixed; right:2em; top:1em;border:none;border-radius:5px;color:white;background:black;",
