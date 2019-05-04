@@ -4,7 +4,7 @@ const options = {
     maxLiked    : 80,
     minLikes    : 15,
     maxLikes    : 300,
-    imageAlt : "person, people, closeup, selfie", 
+    imageAlt : "1 person, 2 people, people, closeup, selfie", 
     include : "인스타, 인친, 라이크, 좋아요, 좋아요환영, 좋아요반사, 라이크반사, 반사, l4l, like, instalike, follow, followme, 맞팔, 팔로우, 맞팔해요, f4f", 
     exclude:"10k, 20k, 30k, 10kfollowers, 20kfollowers, 흔남, 훈남, 오늘의훈남, 셀기꾼, 육아스타그램, 육아, 육아그램, 고딩, 18, 19, 고1, 고2, 고3", 
     comments : {
@@ -84,14 +84,14 @@ class Instabot {
             maxLiked: options.maxLiked,
             minLikes: options.minLikes,
             maxLikes : options.maxLikes,
-            imageAlt : options.imageAlt.replace(' ','').split(','),
-            include: options.include.replace(' ','').split(',') || [],
-            exclude: options.exclude.replace(' ','').split(',') || [],
+            imageAlt : options.imageAlt.replace(/, /g,'').split(','),
+            include: options.include.replace(/ /g,'').split(',') || [],
+            exclude: options.exclude.replace(/ /g,'').split(',') || [],
         }
         this.comments = {
             conditions : {
-                followback : options.comments.conditions.followback.replace(' ','').split(','),
-                likeback : options.comments.conditions.likeback.replace(' ','').split(','), 
+                followback : options.comments.conditions.followback.replace(/ /g,'').split(','),
+                likeback : options.comments.conditions.likeback.replace(/ /g,'').split(','), 
             },
             comments : {
                 followback: options.comments.comments.followback,
@@ -267,6 +267,7 @@ class Instabot {
             const hasTag = (this.conditions.include.length > 0 )
                 ? Array.from(tags)
                 .filter(function(w){
+                    console.log(w.innerText.replace('#',''));
                     return this.indexOf(w.innerText.replace('#','')) >= 0;
                 },this.conditions.include)
                 .map((tag)=>{
@@ -294,6 +295,7 @@ class Instabot {
                     return this.indexOf(w.innerText.replace('#','')) >= 0;
                 },this.comments.conditions.likeback)
                 :[];
+            console.log(hasTag,hasExcludes,hasF4F,hasL4L);
             this.post.tags = {
                 hasTag,
                 hasExcludes,
