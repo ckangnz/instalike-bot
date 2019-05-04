@@ -48,6 +48,7 @@ The Instabot will NOT do these if Filtering is turned off:
   | `\`         | Toggle Commenting (Commenting off will not comment nor follow)                  |
   | `Shift + \` | Toggle Following (Following off will only comments for L4L)                     |
   | `=`         | Show my likes                                                                   |
+  | `+`         | Show current setting                                                            |
   | `;`         | Toggle Logs                                                                     |
   | `:`         | Clear Logs                                                                      |
 

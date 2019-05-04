@@ -569,49 +569,59 @@ class Instabot {
         return this.status;
     }
     async getUnfollowers(){
-        const following = await this.loadFollowers(true);
-        const followers = await this.loadFollowers(false);
-        const unfollowers = following.filter(function(f){
-            return this.indexOf(f) == -1;
-        },followers)
-        this.status.unfollowers.push(unfollowers);
-        this.logger(`You have ${unfollowers.length} people who are not following back:`,this.font.heading)
-        unfollowers.forEach((f)=>{
-            this.logger(`${f} :  https://www.instagram.com/${f}`,this.font.small)
-        })
-        return unfollowers;
+        this.logger(`>>>>>Finding unfollowers.. Please wait..`,this.font.super)
+        const following = await this.loadFollowers(true).catch(err=>this.logger(err,this.font.error) && false);
+        const followers = (following)? await this.loadFollowers(false).catch(err=>this.logger(err,this.font.error) && false):null;
+        if(following && followers){
+            const unfollowers = following.filter(function(f){
+                return this.indexOf(f) == -1;
+            },followers)
+            this.status.unfollowers.push(unfollowers);
+            this.logger(`You have ${unfollowers.length} people who are not following back:`,this.font.heading)
+            unfollowers.forEach((f)=>{
+                this.logger(`${f} :  https://www.instagram.com/${f}`,this.font.small)
+            })
+            return unfollowers;
+        }
     }
     async loadFollowers(loadingFollowings){
         (loadingFollowings)
             ?this.logger(`...loading followings...`,this.font.small)
             :this.logger(`...loading followers ...`, this.font.small)
-        return new Promise(async resolve => {
+        return new Promise(async (resolve, reject )=> {
             const flBtn = document.querySelectorAll(this.element.followersBtn);
             (loadingFollowings)
                 ? flBtn[flBtn.length-1].click()
                 : flBtn[0].click()
-            const result = await this.delay(this.time.delayInitial).then(()=> this.fetchPeople())
+            const result = await this.delay(this.time.delayInitial).then(()=> this.fetchPeople()).catch(err=>reject(err))
             resolve(result);
         })
     }
     fetchPeople(){
-        return new Promise(resolve => {
+        return new Promise((resolve,reject) => {
             const itvl = setInterval(()=>{
                 const scroll = document.querySelector(this.element.followersOverHidden);
-                const loadedHeight = document.querySelector(this.element.followersInnerHeight).scrollHeight
-                const isLoading = (document.querySelector(this.element.suggestionsTitle))
-                    ? scroll.scrollTop != loadedHeight
-                    : (document.querySelector(this.element.followerPopupLoadingIcon))?true:scroll.scrollTop + scroll.offsetHeight != loadedHeight 
-                if(isLoading){
-                    scroll.scrollTop = loadedHeight;
+                const innerbox = document.querySelector(this.element.followersInnerHeight);
+                console.log(scroll,innerbox);
+                if(scroll && innerbox){
+                    const loadedHeight = innerbox.scrollHeight
+                    const isLoading = (document.querySelector(this.element.suggestionsTitle))
+                        ? scroll.scrollTop != loadedHeight
+                        : (document.querySelector(this.element.followerPopupLoadingIcon))?true:scroll.scrollTop + scroll.offsetHeight != loadedHeight 
+                    if(isLoading){
+                        scroll.scrollTop = loadedHeight;
+                    } else {
+                        clearInterval(itvl);
+                        const list = Array.from(document.querySelectorAll(this.element.followersList)).map((p)=>{
+                            return p.innerText
+                        })
+                        document.querySelector(this.element.followerPopupCloseBtn).click()
+                        this.logger(`Finished collecting`,this.font.small);
+                        setTimeout(()=>resolve(list),1000)
+                    }
                 } else {
                     clearInterval(itvl);
-                    const list = Array.from(document.querySelectorAll(this.element.followersList)).map((p)=>{
-                        return p.innerText
-                    })
-                    document.querySelector(this.element.followerPopupCloseBtn).click()
-                    this.logger(`Finished collecting`,this.font.small);
-                    setTimeout(()=>resolve(list),1000)
+                    reject('Force canceled!');
                 }
             }, 1000)
         })
@@ -655,6 +665,7 @@ class InstabotUI {
             right: "position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;",
             logger: "position:fixed;top:50px;left:0;width:25%;height:500px;overflow-y:auto;padding:15px;color:white;background:#252525;z-index:99;border-radius:5px;resize:vertical;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
+            smallpopup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:40%;height:50%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popupInner: "overflow:auto;width:100%;height:100%",
             popupClose: "position:fixed; right:2em; top:1em;border:none;border-radius:5px;color:white;background:black;",
             ul: "display:flex;flex-flow:row wrap;margin-top:40px;box-sizing:border-box;",
@@ -700,11 +711,11 @@ class InstabotUI {
 
         const mylikedbtn = this.myLikedBtn(left);
         const togglelogboxbtn = this.toggleLogBoxBtn(left);
+        const statusbtn = this.statusBtn(left);
         const togglefilterbtn = this.toggleFilterBtn(left);
         const togglecommentingbtn = this.toggleCommentingBtn(left);
         const togglefollowbtn = this.toggleFollowingBtn(left);
         const toggleincludebtn = this.toggleIncludeTopBtn(left);
-        const statusbtn = this.statusBtn(left);
         const clearlogbtn = this.clearLogBtn(left);
 
         const getunfollowersbtn = this.getUnfollowersBtn(right);
@@ -738,10 +749,15 @@ class InstabotUI {
                 e.preventDefault();
                 self.toggleFollowingBtnClicked(togglefollowbtn);
             }
-            if(e.keyCode == '187'){
+            if(e.keyCode == '187' && !e.shiftKey){
                 // =
                 e.preventDefault();
                 self.myLikedBtnClicked(mylikedbtn);
+            }
+            if(e.keyCode == '187' && e.shiftKey){
+                // +
+                e.preventDefault();
+                self.statusBtnClicked(statusbtn);
             }
             if(e.keyCode == '189'){
                 // -
@@ -758,12 +774,12 @@ class InstabotUI {
         parent.appendChild(el);
         return cb(el);
     }
-    createPopup(content){
+    createPopup(content, id, style){
         const popup = this.createElement({
-            id:'Popup',
+            id:id,
             type:"div",
             text:"",
-            style:this.style.popup,
+            style:style,
             parent:document.body,
         },p=>{
             const popupInner = this.createElement({
@@ -772,17 +788,7 @@ class InstabotUI {
                 text:`${content}`,
                 style:this.style.popupInner,
                 parent:p,
-            },pInner=>{
-                pInner = this.createElement({
-                    id:'PopupClose',
-                    type:'button',
-                    text:"Close",
-                    style:this.style.popupClose,
-                    parent:pInner,
-                },pbtn=>{
-                    pbtn.addEventListener('click',()=>this.closePopup(p));
-                })
-            })
+            },el=>el)
             return p;
         })
         return popup;
@@ -858,84 +864,106 @@ class InstabotUI {
             style: this.style.btn.green,
             parent,
         },b=>{
-            b.addEventListener('click',async function(){
-                const unfollowers = await self.instabot.getUnfollowers();
-                const html = `
-                <ul style="margin-top:40px;">
-                    ${unfollowers.map((t)=>( 
-                        `<li style="padding:1em;">
-                            <a href="https://www.instagram.com/${t}" target="_blank">https://www.instagram.com/${t}</a>
-                        </li>`
-                    )).join('')}
-                </ul>
-                `
-                self.createPopup(html);
-            })
+            b.addEventListener('click',()=>this.getUnfollowersBtnClicked(b))
             return b;
         })
         return btn;
     }
+    async getUnfollowersBtnClicked(btn){
+        const popupname = 'UnfollowersPopup';
+        if(btn.className == 'off'){
+            const popup = document.getElementById(popupname);
+            btn.innerText = "Find Unfollowers";
+            this.closePopup(popup);
+        } else {
+            if(!btn.disabled){
+                btn.disabled=true;
+                btn.innerText = "Progressing..."
+                const unfollowers = await this.instabot.getUnfollowers();
+                const html = unfollowers
+                    ?` <ul style="margin-top:40px;">
+                        ${unfollowers.map((t)=>( 
+                            `<li style="padding:1em;">
+                                <a href="https://www.instagram.com/${t}" target="_blank">https://www.instagram.com/${t}</a>
+                            </li>`
+                        )).join('')}
+                    </ul>
+                    `
+                :`<h2 style="${this.style.heading}text-align:center;">Please try again!</h2>`
+                btn.disabled=false;
+                btn.innerText = "Close Unfollowers"
+                this.createPopup(html,popupname,this.style.smallpopup);
+            }
+        }
+        btn.classList.toggle('off');
+    }
     statusBtn(parent){
-        const self = this;
         const btn = this.createElement({
             id:'StatusBtn',
             type:'button',
-            text:"Status",
-            style: this.style.btn.blue,
+            text:"Status ( + )",
+            style: this.style.btn.green,
             parent,
         },b=>{
-            b.addEventListener('click',function(){
-                const b = self.instabot;
-                b.getStatus();
-                const html = `
-                <div style="margin-top:30px;">
-                    <div style="padding:1em;">
-                        <h2 style="${self.style.heading}">Status</h2>
-                        <h3 style="${self.style.subheading}">Duration:</h3> 
-                        <p style="margin-bottom:5px;">${b.time.maxDuration/b.min} min</p>
-                        <h3 style="${self.style.subheading}">Filtering Mode:</h3>
-                        <p style="margin-bottom:5px;">${b.options.isFiltering}</p>
-                        <h3 style="${self.style.subheading}">Following Mode:</h3>
-                        <p style="margin-bottom:5px;">${b.options.isFollowing}</p>
-                        ${b.options.isFiltering 
-                        ? `
-                            <h3 style="${self.style.subheading}">Likes limit :</h3>
-                            <p style="margin-bottom:5px;">${b.conditions.maxLiked}</p>
-                            <h3 style="${self.style.subheading}">Likes max :</h3>
-                            <p style="margin-bottom:5px;">${b.conditions.maxLikes}</p>
-                            <h3 style="${self.style.subheading}">Likes min :</h3>
-                            <p style="margin-bottom:5px;">${b.conditions.minLikes}</p>
-                            <h3 style="${self.style.subheading}">Comment if :</h3>
-                            ${b.comments.conditions.likeback.join(',') + b.comments.conditions.followback.join(',')}
-                        `:`
-                            <p style="${self.style.error}">Instabot will like anything but won't follow nor comment</p>
-                        `}
-                        <h2 style="${self.style.heading}margin-top:2em;">Results</h2>
-                        <h3 style="${self.style.subheading}">Current liked:</h3>
-                        <p style="margin-bottom:5px;">${b.status.liked.length + b.status.archivedLiked.length}</p>
-                        <h3 style="${self.style.subheading}">Current followed:</h3>
-                        <p style="margin-bottom:5px;">${b.status.followed.length + b.status.archivedFollowed.length}</p>
-                        ${b.status.archivedFollowed.length>0
-                        ?`${b.status.archivedFollowed.map((f)=>(
-                            `<p><a target="_blank" href="${f.personLink}">${f.personName}</a></p>`
-                        ))}`
-                        :``}
-                        ${b.status.followed.length>0
-                        ?`${b.status.followed.map((f)=>(
-                            `<p><a target="_blank" href="${f.personLink}">${f.personName}</a></p>`
-                        ))}`
-                        :``}
-                    </div>
-                </div>
-                `
-                self.createPopup(html);
-            })
+            b.addEventListener('click',()=>this.statusBtnClicked(b))
             return b;
         })
         return btn;
     }
+    statusBtnClicked(btn){
+        const popupname = 'StatusPopUp';
+        if(btn.className == 'off'){
+            const popup = document.getElementById(popupname);
+            this.closePopup(popup);
+        } else {
+            const b = this.instabot;
+            b.getStatus();
+            const html = `
+            <div style="margin-top:30px;">
+                <div style="padding:1em;">
+                    <h2 style="${this.style.heading}">Status</h2>
+                    <h3 style="${this.style.subheading}">Duration:</h3> 
+                    <p style="margin-bottom:5px;">${b.time.maxDuration/b.min} min</p>
+                    <h3 style="${this.style.subheading}">Filtering Mode:</h3>
+                    <p style="margin-bottom:5px;">${b.options.isFiltering}</p>
+                    <h3 style="${this.style.subheading}">Following Mode:</h3>
+                    <p style="margin-bottom:5px;">${b.options.isFollowing}</p>
+                    ${b.options.isFiltering 
+                    ? `
+                        <h3 style="${this.style.subheading}">Likes limit :</h3>
+                        <p style="margin-bottom:5px;">${b.conditions.maxLiked}</p>
+                        <h3 style="${this.style.subheading}">Likes max :</h3>
+                        <p style="margin-bottom:5px;">${b.conditions.maxLikes}</p>
+                        <h3 style="${this.style.subheading}">Likes min :</h3>
+                        <p style="margin-bottom:5px;">${b.conditions.minLikes}</p>
+                        <h3 style="${this.style.subheading}">Comment if :</h3>
+                        ${b.comments.conditions.likeback.join(',') + b.comments.conditions.followback.join(',')}
+                    `:`
+                        <p style="${this.style.error}">Instabot will like anything but won't follow nor comment</p>
+                    `}
+                    <h2 style="${this.style.heading}margin-top:2em;">Results</h2>
+                    <h3 style="${this.style.subheading}">Current liked:</h3>
+                    <p style="margin-bottom:5px;">${b.status.liked.length + b.status.archivedLiked.length}</p>
+                    <h3 style="${this.style.subheading}">Current followed:</h3>
+                    <p style="margin-bottom:5px;">${b.status.followed.length + b.status.archivedFollowed.length}</p>
+                    ${b.status.archivedFollowed.length>0
+                    ?`${b.status.archivedFollowed.map((f)=>(
+                        `<p><a target="_blank" href="${f.personLink}">${f.personName}</a></p>`
+                    ))}`
+                    :``}
+                    ${b.status.followed.length>0
+                    ?`${b.status.followed.map((f)=>(
+                        `<p><a target="_blank" href="${f.personLink}">${f.personName}</a></p>`
+                    ))}`
+                    :``}
+                </div>
+            </div>
+            `
+            this.createPopup(html, popupname, this.style.smallpopup);
+        }
+        btn.classList.toggle('off');
+    }
     myLikedBtn(parent){
-        const self = this;
         const btn = this.createElement({
             id:'MyLikedBtn',
             type:'button',
@@ -943,19 +971,20 @@ class InstabotUI {
             style: this.style.btn.green,
             parent,
         },b=>{
-            b.addEventListener('click',()=>myLikedBtnClicked(b));
+            b.addEventListener('click',()=>this.myLikedBtnClicked(b));
             return b;
         })
         return btn;
     }
     myLikedBtnClicked(btn){
+        const popupname = 'MyLikesPopup';
         if(btn.className == 'off'){
-            const popup = document.getElementById('Popup');
+            const popup = document.getElementById(popupname);
             this.closePopup(popup);
         } else {
             const liked = [ ...this.instabot.status.liked , ...this.instabot.status.archivedLiked];
-            const html = `
-                <ul style="${this.style.ul}">
+            const html = (liked.length>0)
+                ?`<ul style="${this.style.ul}">
                     ${liked.map((t)=>( 
                         `<li style="${this.style.li}">
                             <div style="${this.style.person}">
@@ -971,7 +1000,8 @@ class InstabotUI {
                     )).join('')}
                 </ul>
                 `
-            this.createPopup(html);
+                :`<h1 style="${this.style.heading}text-align:center;">You have not liked any posts yet.</h1>`
+            this.createPopup(html,popupname,this.style.popup);
         }
         btn.classList.toggle('off');
     }
