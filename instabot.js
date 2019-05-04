@@ -730,10 +730,10 @@ class InstabotUI {
         const mylikedbtn = this.myLikedBtn(left);
         const togglelogboxbtn = this.toggleLogBoxBtn(left);
         const statusbtn = this.statusBtn(left);
+        const toggleincludebtn = this.toggleIncludeTopBtn(left);
         const togglefilterbtn = this.toggleFilterBtn(left);
         const togglecommentingbtn = this.toggleCommentingBtn(left);
         const togglefollowbtn = this.toggleFollowingBtn(left);
-        const toggleincludebtn = this.toggleIncludeTopBtn(left);
         const clearlogbtn = this.clearLogBtn(left);
 
         const getunfollowersbtn = this.getUnfollowersBtn(right);
@@ -777,10 +777,15 @@ class InstabotUI {
                 e.preventDefault();
                 self.statusBtnClicked(statusbtn);
             }
-            if(e.keyCode == '189'){
+            if(e.keyCode == '189' && !e.shiftKey){
                 // -
                 e.preventDefault();
                 self.toggleFilterBtnClicked(togglefilterbtn);
+            }
+            if(e.keyCode == '189' && e.shiftKey){
+                // _
+                e.preventDefault();
+                self.toggleIncludeTopBtnClicked(toggleincludebtn);
             }
         })
     }
@@ -1009,25 +1014,28 @@ class InstabotUI {
         const btn = this.createElement({
             id:'ToggleTopBtn',
             type:'button',
-            text:"From Top",
+            text:"Top Post ( _ )",
             style: self.style.btn.blue,
             parent,
         },b=>{
-            b.addEventListener('click',function(){
-                if(this.className == 'off'){
-                    self.instabot.toggleIncludeTop();
-                    this.innerText="From Top";
-                    this.style = self.style.btn.blue;
-                } else {
-                    self.instabot.toggleIncludeTop();
-                    this.innerText = "From Recent";
-                    this.style = self.style.btn.red;
-                }
-                this.classList.toggle('off');
-            })
+            b.addEventListener('click',()=>self.toggleIncludeTopBtnClicked(b))
             return b;
         })
         return btn;
+    }
+    toggleIncludeTopBtnClicked(btn){
+        if(btn.className == 'off'){
+            console.log('hi');
+            this.instabot.toggleIncludeTop();
+            btn.innerText = "Top Post ( _ )";
+            btn.style = this.style.btn.blue;
+        } else {
+            console.log('bye');
+            this.instabot.toggleIncludeTop();
+            btn.innerText = "Recent Post ( _ )";
+            btn.style = this.style.btn.red;
+        }
+        btn.classList.toggle('off');
     }
     toggleFilterBtn(parent){
         const self = this;

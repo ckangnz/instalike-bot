@@ -45,6 +45,7 @@ The Instabot will NOT do these if Filtering is turned off:
   | :---------- | :-----------                                                                    |
   | `'`         | Start / Stop Instabot                                                           |
   | `-`         | Toggle Filter (Filtering off will like everything but won't comment nor follow) |
+  | `_`         | Start from Top Post or Recent Post                                              |
   | `\`         | Toggle Commenting (Commenting off will not comment nor follow)                  |
   | `Shift + \` | Toggle Following (Following off will only comments for L4L)                     |
   | `=`         | Show my likes                                                                   |
