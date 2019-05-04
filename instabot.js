@@ -694,10 +694,10 @@ class InstabotUI {
             li: "display:flex;flex-flow:column;justify-content:space-between;width:25%;padding:1em;box-sizing:border-box;",
             person: "display:flex;justify-content:space-between;align-items:center;flex-flow:row;width:100%;margin-bottom:1em;",
             personImage : "width:50px; height:50px;border-radius:50%;",
-            personFollowed: "color:teal;font-size:8px;",
-            personNotFollowed: "color:tomato;font-size:8px;",
+            personFollowed: "color:teal;font-size:1em;",
+            personNotFollowed: "color:tomato;font-size:1em;",
             postImage: "width:100%;min-width:30px;min-height:30px;background:lightgrey;height:auto;",
-            postCommented: "font-size:8px;color:grey;",
+            postCommented: "font-size:1em;color:grey;",
             heading:"font-size:25px;font-weight:bold;margin-bottom:1em;",
             subheading:"font-size:15px;font-weight:bold;",
             bold:"font-weight:bold;",
@@ -1001,11 +1001,11 @@ class InstabotUI {
                 ?`<ul style="${this.style.ul}">
                     ${liked.map((t)=>( 
                         `<li style="${this.style.li}">
-                            <div style="${this.style.person}">
+                            <a style="${this.style.person}" href="${t.person.personLink}" target="_blank">
                                 <span style=${(t.followed)?this.style.personFollowed:this.style.personNotFollowed}>${(t.followed)?"Followed":"Not Following"}</span>
-                                <a href="${t.person.personLink}" target="_blank">${t.person.personName}</a>
+                                <p>${t.person.personName}</p>
                                 <img style="${this.style.personImage}" src="${t.person.personImage}"/>
-                            </div>
+                            </a>
                             <a style="text-align:center;"href="${t.src}"target="_blank">
                                 <img style="${this.style.postImage}" src="${t.image.src}"/>
                             </a>
