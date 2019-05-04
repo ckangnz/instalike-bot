@@ -960,7 +960,7 @@ class InstabotUI {
                     :``}
                     ${b.status.followed.length>0
                     ?`${b.status.followed.map((f)=>(
-                        `<p><a target="_blank" href="${f.personLink}">${f.personName}</a></p>`
+                        `<p><a target="_blank" href="${f.person.personLink}">${f.person.personName}</a></p>`
                     ))}`
                     :``}
                 </div>
@@ -1028,12 +1028,10 @@ class InstabotUI {
     }
     toggleIncludeTopBtnClicked(btn){
         if(btn.className == 'off'){
-            console.log('hi');
             this.instabot.toggleIncludeTop();
             btn.innerText = "Top Post ( _ )";
             btn.style = this.style.btn.blue;
         } else {
-            console.log('bye');
             this.instabot.toggleIncludeTop();
             btn.innerText = "Recent Post ( _ )";
             btn.style = this.style.btn.red;
