@@ -101,13 +101,14 @@ class Instabot {
             emoji: options.comments.emoji.split(','),
         }
         this.font ={
-            heading: 'font-size:12px; font-weight:bold;',
             super:'font-size:12px;font-weight:bold;background:rgba(255,223,0,0.3);',
-            link: 'color:deepskyblue;',
+            heading: 'font-size:12px; font-weight:bold;',
             small : 'font-size:8px;',
-            override:'font-size:8px;background:rgba(30,144,255,0.3);',
-            pass:'font-size:8px;background:rgba(0,256,0,0.3);',
-            error:'font-size:8px;background:rgba(256,0,0,0.3)',
+            link: 'color:deepskyblue;',
+            good:'font-size:10px;background:rgba(148,0,211,0.3);', //violet
+            override:'font-size:8px;background:rgba(30,144,255,0.3);', //blue
+            pass:'font-size:8px;background:rgba(0,256,0,0.3);', //green
+            error:'font-size:8px;background:rgba(256,0,0,0.3)', //red
         }
     }
     delay(ms){
@@ -429,7 +430,7 @@ class Instabot {
                     this.post.likeBtn.click();
                     this.post.liked = true;
                     this.status.liked.push(this.post);
-                    this.logger(`Liked post`,this.font.heading);
+                    this.logger(`Successfully LIKED post`,this.font.good);
                     return resolve();
                 })
         })
@@ -507,7 +508,7 @@ class Instabot {
                     this.delay(this.time.delayComment)
                         .then(()=>{
                             btn.click() 
-                            this.logger(`Posted comment: "${this.post.comment}"`,this.font.heading)
+                            this.logger(`Successfully POSTED comment: "${this.post.comment}"`,this.font.good)
                             return resolve() 
                         })
                 } else {
@@ -551,7 +552,7 @@ class Instabot {
                             followbtn.click();
                             this.post.followed = true;
                             this.status.followed.push(this.post);
-                            this.logger(`Followed: <a style="${this.font.link}" style="${this.font.link}" target="_blank" href="${this.post.person.personLink}">${this.post.person.personLink}</a>`,this.font.heading);
+                            this.logger(`FOLLOWED: <a style="${this.font.link}" style="${this.font.link}" target="_blank" href="${this.post.person.personLink}">${this.post.person.personLink}</a>`,this.font.good);
                             resolve();
                         }
                         resolve();
