@@ -9,7 +9,7 @@ const options = {
     exclude:"10k, 20k, 30k, 10kfollowers, 20kfollowers, 흔남, 훈남, 오늘의훈남, 셀기꾼, 육아스타그램, 육아, 육아그램, 고딩, 18, 19, 고1, 고2, 고3", 
     comments : {
         conditions : {
-            followback : "선팔맞팔, 선팔하면맞팔, 선팔하면맞팔가요, 선팔후맞팔, 맞팔, 소통", 
+            followback : "선팔맞팔, 선팔하면맞팔, 선팔하면맞팔가요, 선팔후맞팔, 맞팔, 소통, 언팔싫어요", 
             likeback : "좋아요반사, 라이크반사, 좋반, 맞좋아요", 
         },
         comments : {
@@ -685,7 +685,7 @@ class InstabotUI {
             right: "position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;",
             logger: "position:fixed;top:50px;left:0;width:25%;height:500px;overflow-y:auto;padding:15px;color:white;background:#252525;z-index:99;border-radius:5px;resize:vertical;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
-            smallpopup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:40%;height:50%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
+            smallpopup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:40%;height:80%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popupInner: "overflow:auto;width:100%;height:100%",
             popupClose: "position:fixed; right:2em; top:1em;border:none;border-radius:5px;color:white;background:black;",
             ul: "display:flex;flex-flow:row wrap;margin-top:40px;box-sizing:border-box;",
@@ -942,12 +942,18 @@ class InstabotUI {
                         <p style="margin-bottom:5px;">${b.conditions.maxLikes}</p>
                         <h3 style="${this.style.subheading}">Likes min :</h3>
                         <p style="margin-bottom:5px;">${b.conditions.minLikes}</p>
+                        <h3 style="${this.style.subheading}">Like if :</h3>
+                        <p style="margin-bottom:5px;">${b.conditions.include.join(',')}</p>
+                        <h3 style="${this.style.subheading}">Don't like if :</h3>
+                        <p style="margin-bottom:5px;">${b.conditions.exclude.join(',')}</p>
+                        <h3 style="${this.style.subheading}">Image type required to comment  :</h3>
+                        <p style="margin-bottom:5px;">${b.conditions.imageAlt.join(',')}</p>
                         <h3 style="${this.style.subheading}">Comment if :</h3>
-                        ${b.comments.conditions.likeback.join(',') + b.comments.conditions.followback.join(',')}
+                        <p style="margin-bottom:5px;">${b.comments.conditions.likeback.join(',') +","+ b.comments.conditions.followback.join(',')}</p>
                     `:`
                         <p style="${this.style.error}">Instabot will like anything but won't follow nor comment</p>
                     `}
-                    <h2 style="${this.style.heading}margin-top:2em;">Results</h2>
+                    <h2 style="${this.style.heading}margin-top:1em;">Results</h2>
                     <h3 style="${this.style.subheading}">Current liked:</h3>
                     <p style="margin-bottom:5px;">${b.status.liked.length + b.status.archivedLiked.length}</p>
                     <h3 style="${this.style.subheading}">Current followed:</h3>
