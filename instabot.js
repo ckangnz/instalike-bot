@@ -1,5 +1,5 @@
 const options = {
-    maxDuration : 5, //min
+    maxDuration : 10, //min
     maxFollows  : 10,
     maxLiked    : 80,
     minLikes    : 15,
@@ -190,15 +190,18 @@ class Instabot {
     nextImage(){
         if(this.status.liked.length >= this.conditions.maxLiked) { 
             this.logger(`You have already liked ${this.conditions.maxLiked} images. Restarting will reset`,this.font.heading);
-            this.stop();
+            const evt = new KeyboardEvent('keydown', {'keyCode':222, 'which':222});
+            document.dispatchEvent(evt);
         }  
         if(this.status.followed.length >= this.conditions.maxFollows) { 
             this.logger(`You have already followed ${this.conditions.maxFollows} followers. Restarting will reset`,this.font.heading);
-            this.stop();
+            const evt = new KeyboardEvent('keydown', {'keyCode':222, 'which':222});
+            document.dispatchEvent(evt);
         }  
         if(!(performance.now() - this.time.start < this.time.maxDuration)){
             this.logger(`Times up!!`,this.font.super);
-            this.stop();
+            const evt = new KeyboardEvent('keydown', {'keyCode':222, 'which':222});
+            document.dispatchEvent(evt);
         }
         if(
             this.status.inProgress
@@ -226,7 +229,7 @@ class Instabot {
         return new Promise(resolve=>{
             if(this.post.src == window.location.href){
                 this.logger(`END OF POSTS`,this.font.super+'font-size:10px;')
-                var evt = new KeyboardEvent('keydown', {'keyCode':222, 'which':222});
+                const evt = new KeyboardEvent('keydown', {'keyCode':222, 'which':222});
                 document.dispatchEvent(evt);
             }
             resolve();
