@@ -84,7 +84,7 @@ class Instabot {
             maxLiked: options.maxLiked,
             minLikes: options.minLikes,
             maxLikes : options.maxLikes,
-            imageAlt : options.imageAlt.replace(/, /g,'').split(','),
+            imageAlt : options.imageAlt.replace(/, /g,',').split(','),
             include: options.include.replace(/ /g,'').split(',') || [],
             exclude: options.exclude.replace(/ /g,'').split(',') || [],
         }
@@ -267,7 +267,6 @@ class Instabot {
             const hasTag = (this.conditions.include.length > 0 )
                 ? Array.from(tags)
                 .filter(function(w){
-                    console.log(w.innerText.replace('#',''));
                     return this.indexOf(w.innerText.replace('#','')) >= 0;
                 },this.conditions.include)
                 .map((tag)=>{
@@ -295,7 +294,6 @@ class Instabot {
                     return this.indexOf(w.innerText.replace('#','')) >= 0;
                 },this.comments.conditions.likeback)
                 :[];
-            console.log(hasTag,hasExcludes,hasF4F,hasL4L);
             this.post.tags = {
                 hasTag,
                 hasExcludes,
