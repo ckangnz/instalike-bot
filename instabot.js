@@ -90,11 +90,12 @@ class Instabot {
         }
         this.font ={
             heading: 'font-size:12px; font-weight:bold;',
+            super:'font-size:12px;font-weight:bold;background:rgba(255,223,0,0.3);',
             link: 'color:deepskyblue;',
             small : 'font-size:8px;',
-            override:'font-size:8px;important;background:rgba(30,144,255,0.3);',
-            pass:'font-size:8px;important;background:rgba(0,256,0,0.3);',
-            error:'font-size:8px;important;background:rgba(256,0,0,0.3)',
+            override:'font-size:8px;background:rgba(30,144,255,0.3);',
+            pass:'font-size:8px;background:rgba(0,256,0,0.3);',
+            error:'font-size:8px;background:rgba(256,0,0,0.3)',
         }
     }
     delay(ms){
@@ -124,7 +125,7 @@ class Instabot {
         this.time.start = performance.now();
         this.archive();
         this.openPost()
-        this.logger(`>>>>>>>INITIATING INSTABOT....<<<<<<<`,this.font.heading);
+        this.logger(`>>>>>>>INITIATING INSTABOT....<<<<<<<`,this.font.super);
         this.delay(this.time.delayInitial)
             .then(()=> this.analyzePost() )
     }
@@ -141,7 +142,7 @@ class Instabot {
         }
     }
     stop(){
-        this.logger(`>>>>>>>Stopping the process. Please wait....<<<<`,this.font.heading+this.font.override);
+        this.logger(`>>>>>>>Stopping the process. Please wait....<<<<`,this.font.super);
         this.status.inProgress = false;
     }
     openPost(){
@@ -198,7 +199,7 @@ class Instabot {
         } else {
             this.logger(`Total Like count: ${this.status.liked.length} images`,this.font.small);
             this.logger(`Total Follow count: ${this.status.followed.length}`,this.font.small);
-            this.logger(`>>>>>>FINISHED<<<<<<`,this.font.heading);
+            this.logger(`>>>>>>FINISHED<<<<<<`,this.font.super);
             this.status.followed.forEach((f)=>{
                 this.logger(`<a style="${this.font.link}" target="_blank" href="${f.person.personLink}">${f.person.personName}</a> `,this.font.small);
             })
