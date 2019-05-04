@@ -24,7 +24,6 @@ const options = {
         },
         emoji: "😊, 😛, 🤗, 😄, 🤙, 👍, 🙌, 🙏, :), :D, ;), ㅎㅎ, ㅋㅋㅋ, ", 
     }
-
 }
 class Instabot {
     constructor(options){
@@ -50,7 +49,7 @@ class Instabot {
             numberOfLikes : `article section div div:last-child button[type=button] span,
                              article section div div:last-child a.zV_Nj span`,
             likeBtn:'article span.glyphsSpriteHeart__outline__24__grey_9.u-__7',
-            reply: 'span.EizgU',
+            reply: '.Igw0E:not(.MGdpg) span.EizgU',
             extraReply: 'span.glyphsSpriteCircle_add__outline__24__grey_9.u-__7',
             tags : 'article a[href*="/tags/"]',
             nextBtn: 'a.coreSpriteRightPaginationArrow',
