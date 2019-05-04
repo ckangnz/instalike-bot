@@ -35,7 +35,6 @@ class Instabot {
             start: performance.now(),
             delayInitial: 2 * this.s,
             delayLike: 3 * this.s,
-            delayComment: 5 * this.s,
             delayFollow: 2 * this.s,
             delayNext: 2 * this.s,
             maxDuration: options.maxDuration * this.min,
@@ -86,8 +85,8 @@ class Instabot {
             minLikes: options.minLikes,
             maxLikes : options.maxLikes,
             imageAlt : options.imageAlt.split(','),
-            include: options.include || [],
-            exclude: options.exclude || [],
+            include: options.include.split(',') || [],
+            exclude: options.exclude.split(',') || [],
         }
         this.comments = {
             conditions : {
@@ -424,7 +423,7 @@ class Instabot {
     }
     likePost(){
         return new Promise(resolve=>{
-            this.logger(`..liking post..`,this.font.small);
+            this.logger(`..liking post in ${this.time.delayLike/this.s}s..`,this.font.pass);
             this.delay(this.time.delayLike)
                 .then(()=>{
                     this.post.likeBtn.click();
@@ -504,8 +503,9 @@ class Instabot {
             ){
                 const btn = document.querySelector(this.element.commentPostBtn);
                 if(btn){
-                    this.logger(`..posting comment..`,this.font.small)
-                    this.delay(this.time.delayComment)
+                    const delay = Math.round(this.post.comment.length * 0.4);
+                    this.logger(`..posting comment in ${delay}s..`,this.font.pass)
+                    this.delay(delay * this.s)
                         .then(()=>{
                             btn.click() 
                             this.logger(`Successfully POSTED comment: "${this.post.comment}"`,this.font.good)
