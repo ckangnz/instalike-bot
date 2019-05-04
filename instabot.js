@@ -153,8 +153,7 @@ class Instabot {
             this.status.followed = [];
         }
     }
-    stop(forced = false){
-        (forced)?this.logger('FORCE STOPPING!',this.font.super):null;
+    stop(){
         this.logger(`STOPPING. PLEASE WAIT..`,this.font.super);
         this.status.inProgress = false;
     }
@@ -218,10 +217,10 @@ class Instabot {
         } else {
             this.logger(`Total Like count: ${this.status.liked.length} images`,this.font.good);
             this.logger(`Total Follow count: ${this.status.followed.length}`,this.font.good);
-            this.logger(`FINISHED`,this.font.super);
             this.status.followed.forEach((f)=>{
                 this.logger(`<a style="${this.font.link}" target="_blank" href="${f.person.personLink}">${f.person.personName}</a> `,this.font.small);
             })
+            this.logger(`FINISHED`,this.font.super);
             //document.querySelector(this.element.postCloseBtn).click();
         }
     }
@@ -839,7 +838,7 @@ class InstabotUI {
     }
     startBtnClicked(btn){
         if(btn.className == 'started'){
-            this.instabot.stop(true);
+            this.instabot.stop();
             btn.innerText="Start instabot ( ' )";
             btn.style = this.style.btn.green;
         } else {
