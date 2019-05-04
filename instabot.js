@@ -567,8 +567,6 @@ class Instabot {
                     ? this.logger(`Following option turned off`,this.font.override)
                     :(followed)
                     ? this.logger(`Already following.`,this.font.small)
-                    :(!comment)
-                    ? this.logger(`Skipping follow. Not commented`,this.font.error)
                     :(!tags.hasF4F)
                     ? this.logger(`Skipping follow. Missing required tags.`,this.font.error)
                     :null;
