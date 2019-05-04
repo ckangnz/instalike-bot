@@ -56,18 +56,24 @@ note: You can't click any buttons when instabot is in progress. Press `'` and wa
 
 ---
 
-### Customize these in the scripts :
-  | `this.conditions.` | Description                                     |
-  | :---------------   | :---------------------------------------------  |
-  | `maxFollows`       | Maximum follow until last initialised task ends |
-  | `maxLiked`         | Maximum likes until last initialised task ends  |
-  | `minLikes`         | Minimum likes required to like the post         |
-  | `maxLikes`         | Maximum likes required to like the post         |
-  | `imageAlt`         | Image Alt required to comment=>follow           |
-  | `include`          | Tags required to like post                      |
-  | `exclude`          | Tags required to NOT like post                  |
+### Customize the option at the top :
+##### Note 
+ * Make sure to NOT have spaces between `,` for tag options
+ * For random comments, wrap your comment in `""` and put `,` at the end
+ * Remove `,` at the end of `emoji` if you wish to have emoji all the time.
 
-  | `this.comments.`        | Description                                    |
+  | General option   | Description                                     |
+  | :--------------- | :---------------------------------------------  |
+  | `maxDuration`    | Maximum duration in minutes                     |
+  | `maxFollows`     | Maximum follow until last initialised task ends |
+  | `maxLiked`       | Maximum likes until last initialised task ends  |
+  | `minLikes`       | Minimum likes required to like the post         |
+  | `maxLikes`       | Maximum likes required to like the post         |
+  | `imageAlt`       | Image Alt required to comment=>follow           |
+  | `include`        | Tags required to like post                      |
+  | `exclude`        | Tags required to NOT like post                  |
+
+  | Comments Option         | Description                                    |
   | :---------------        | :--------------------------------------------- |
   | `conditions.followback` | Tags required to comment f4f                   |
   | `conditions.likeback`   | Tags required to comment l4l                   |

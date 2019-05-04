@@ -1,5 +1,33 @@
+const options = {
+    maxDuration : 5, //min
+    maxFollows  : 10,
+    maxLiked    : 80,
+    minLikes    : 15,
+    maxLikes    : 300,
+    imageAlt : "1 person,people,closeup,selfie",
+    include : "인스타,인친,라이크,좋아요,좋아요환영,좋아요반사,라이크반사,반사,l4l,like,instalike,follow,followme,맞팔,팔로우,맞팔해요,f4f",
+    exclude:"10k,20k,30k,10kfollowers,20kfollowers,흔남,훈남,오늘의훈남,셀기꾼,육아스타그램,육아,육아그램,고딩,18,19,고1,고2,고3",
+    comments : {
+        conditions : {
+            followback : "선팔맞팔,선팔하면맞팔,선팔하면맞팔가요,선팔후맞팔,맞팔,소통",
+            likeback : "좋아요반사,라이크반사,좋반,맞좋아요",
+        },
+        comments : {
+            followback: [
+                '선팔하고 가요! 맞팔해주세용','선팔했습니다아아! 맞팔해용','선팔합니다~ 맞팔해주시꺼죠?',
+                '맞팔해여엇!','맞팔할까욧','반가워요! 먼저 팔로우하고 갈게요','먼저 팔로합니다!',
+                '괜찮다면 소통하고싶어요! 선팔합니다아아','소통하구시퍼요! 선팔하구가용!','소통해욧! 맞팔해주셔용',
+            ],
+            likeback: [
+                '피드 잘보구가요','좋아요하구갑니다','안녕하세요 :) 조아요누르고가요','제꺼두 좋아요 눌러주시와요 ㅋㅋ','죠아욧!','굳굳','좋반요!','좋아요반사요!','좋반이요','좋아요 반사왔어요~~','맞좋아요하러왔어요!','좋아요먼저누르고갈게여!',
+            ],
+        },
+        emoji: `😊,😛,🤗,😄,🤙,👍,🙌,🙏,:),:D,;),ㅎㅎ,ㅋㅋㅋ,`,
+    }
+
+}
 class Instabot {
-    constructor(){
+    constructor(options){
         this.s = 1000;
         this.min = 60 * this.s;
         this.hr = 60 * this.min;
@@ -10,7 +38,7 @@ class Instabot {
             delayComment: 5 * this.s,
             delayFollow: 2 * this.s,
             delayNext: 2 * this.s,
-            maxDuration: 5 * this.min,
+            maxDuration: options.maxDuration * this.min,
         };
         this.element = {
             popup: 'div._2dDPU.vCf6V[role=dialog]',
@@ -53,41 +81,24 @@ class Instabot {
             isCommenting : true,
         }
         this.conditions = {
-            maxFollows: 10,
-            maxLiked: 80,
-            minLikes: 15,
-            maxLikes : 300,
-            imageAlt : [ 
-                '1 person','people','closeup','selfie',
-            ],
-            include: [
-                '인스타','인친',
-                "라이크",'좋아요','좋아요환영','좋아요반사','라이크반사','반사','l4l','like','instalike',
-                'follow','followme','맞팔','팔로우','맞팔해요','f4f',
-            ] || [],
-            exclude: [
-                '10k','20k','30k','10kfollowers','20kfollowers',
-                '흔남','훈남','오늘의훈남','셀기꾼',
-                '육아스타그램','육아','육아그램',
-                '고딩','18','19','고1','고2','고3',
-            ] || [],
+            maxFollows: options.maxFollows,
+            maxLiked: options.maxLiked,
+            minLikes: options.minLikes,
+            maxLikes : options.maxLikes,
+            imageAlt : options.imageAlt.split(','),
+            include: options.include || [],
+            exclude: options.exclude || [],
         }
         this.comments = {
             conditions : {
-                followback : ['선팔맞팔','선팔하면맞팔','선팔하면맞팔가요','선팔후맞팔','맞팔','소통'],
-                likeback : ['좋아요반사','라이크반사','좋반','맞좋아요']
+                followback : options.comments.conditions.followback.split(','),
+                likeback : options.comments.conditions.likeback.split(','), 
             },
             comments : {
-                followback: [
-                    '선팔하고 가요! 맞팔해주세용','선팔했습니다아아! 맞팔해용','선팔합니다~ 맞팔해주시꺼죠?',
-                    '맞팔해여엇!','맞팔할까욧','반가워요! 먼저 팔로우하고 갈게요','먼저 팔로합니다!',
-                    '괜찮다면 소통하고싶어요! 선팔합니다아아','소통하구시퍼요! 선팔하구가용!','소통해욧! 맞팔해주셔용',
-                ],
-                likeback: [
-                    '피드 잘보구가요','좋아요하구갑니다','안녕하세요 :) 조아요누르고가요','제꺼두 좋아요 눌러주시와요 ㅋㅋ','죠아욧!','굳굳','좋반요!','좋아요반사요!','좋반이요','좋아요 반사왔어요~~','맞좋아요하러왔어요!','좋아요먼저누르고갈게여!',
-                ]
+                followback: options.comments.comments.followback,
+                likeback: options.comments.comments.likeback,
             },
-            emoji: [ '😊','😛','🤗','😄','🤙','👍','🙌','🙏',':)',':D',';)','ㅎㅎ','ㅋㅋㅋ','' ]
+            emoji: options.comments.emoji.split(','),
         }
         this.font ={
             heading: 'font-size:12px; font-weight:bold;',
@@ -204,7 +215,7 @@ class Instabot {
             this.status.followed.forEach((f)=>{
                 this.logger(`<a style="${this.font.link}" target="_blank" href="${f.person.personLink}">${f.person.personName}</a> `,this.font.small);
             })
-            document.querySelector(this.element.postCloseBtn).click();
+            //document.querySelector(this.element.postCloseBtn).click();
         }
     }
     checkEndOfPost(){
@@ -1116,7 +1127,7 @@ class InstabotUI {
         }
     }
 }
-const instabot = new Instabot();
+const instabot = new Instabot(options);
 const UI = new InstabotUI(instabot);
 UI.init()
 clear();
