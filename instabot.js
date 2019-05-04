@@ -101,8 +101,8 @@ class Instabot {
             emoji: options.comments.emoji.split(','),
         }
         this.font ={
-            super:'font-size:12px;font-weight:bold;background:rgba(255,223,0,0.3);',
-            heading: 'font-size:12px; font-weight:bold;',
+            heading: 'font-size:12px;font-weight:bold;',
+            super:'font-size:12px;font-weight:bold;text-align:center;background:rgba(255,223,0,0.3);',
             small : 'font-size:8px;',
             link: 'color:deepskyblue;',
             good:'font-size:10px;background:rgba(148,0,211,0.3);', //violet
@@ -138,7 +138,7 @@ class Instabot {
         this.time.start = performance.now();
         this.archive();
         this.openPost()
-        this.logger(`>>>>>>>INITIATING INSTABOT....<<<<<<<`,this.font.super);
+        this.logger(`INITIATING INSTABOT`,this.font.super);
         this.delay(this.time.delayInitial)
             .then(()=> this.analyzePost() )
     }
@@ -155,7 +155,7 @@ class Instabot {
         }
     }
     stop(){
-        this.logger(`>>>>>>>Stopping the process. Please wait....<<<<`,this.font.super);
+        this.logger(`STOPPING. PLEASE WAIT..`,this.font.super);
         this.status.inProgress = false;
     }
     openPost(){
@@ -205,14 +205,14 @@ class Instabot {
             this.logger(`Liked ${this.status.liked.length} images. (max:${this.conditions.maxLiked})`,this.font.small);
             this.logger(`Followed ${this.status.followed.length} people (max:${this.conditions.maxFollows})`,this.font.small);
             this.logger(`Time remaining: ${ Math.round((this.time.maxDuration - (performance.now() - this.time.start))/this.min*10)/10} minutes`,this.font.small);
-            this.logger('====NEXT====>',this.font.heading);
+            this.logger('====next====>',this.font.heading);
             this.delay(this.time.delayInitial)
                 .then(()=>this.checkEndOfPost())
                 .then(()=>this.analyzePost())
         } else {
-            this.logger(`Total Like count: ${this.status.liked.length} images`,this.font.small);
-            this.logger(`Total Follow count: ${this.status.followed.length}`,this.font.small);
-            this.logger(`>>>>>>FINISHED<<<<<<`,this.font.super);
+            this.logger(`Total Like count: ${this.status.liked.length} images`,this.font.good);
+            this.logger(`Total Follow count: ${this.status.followed.length}`,this.font.good);
+            this.logger(`FINISHED`,this.font.super);
             this.status.followed.forEach((f)=>{
                 this.logger(`<a style="${this.font.link}" target="_blank" href="${f.person.personLink}">${f.person.personName}</a> `,this.font.small);
             })
@@ -222,7 +222,7 @@ class Instabot {
     checkEndOfPost(){
         return new Promise(resolve=>{
             if(this.post.src == window.location.href){
-                this.logger(`End of posts`,this.font.heading)
+                this.logger(`END OF POSTS`,this.font.super+'font-size:10px;')
                 var evt = new KeyboardEvent('keydown', {'keyCode':222, 'which':222});
                 document.dispatchEvent(evt);
             }
@@ -580,7 +580,7 @@ class Instabot {
         return this.status;
     }
     async getUnfollowers(){
-        this.logger(`>>>>>Finding unfollowers.. Please wait..`,this.font.super)
+        this.logger(`Finding unfollowers.. Please wait..`,this.font.super)
         if(document.querySelectorAll(this.element.followersBtn).length > 0){
             const following = await this.loadFollowers(true).catch(err=>this.logger(err,this.font.error) && false);
             const followers = (following)? await this.loadFollowers(false).catch(err=>this.logger(err,this.font.error) && false):null;
