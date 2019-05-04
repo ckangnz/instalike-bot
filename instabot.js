@@ -570,18 +570,22 @@ class Instabot {
     }
     async getUnfollowers(){
         this.logger(`>>>>>Finding unfollowers.. Please wait..`,this.font.super)
-        const following = await this.loadFollowers(true).catch(err=>this.logger(err,this.font.error) && false);
-        const followers = (following)? await this.loadFollowers(false).catch(err=>this.logger(err,this.font.error) && false):null;
-        if(following && followers){
-            const unfollowers = following.filter(function(f){
-                return this.indexOf(f) == -1;
-            },followers)
-            this.status.unfollowers.push(unfollowers);
-            this.logger(`You have ${unfollowers.length} people who are not following back:`,this.font.heading)
-            unfollowers.forEach((f)=>{
-                this.logger(`${f} :  https://www.instagram.com/${f}`,this.font.small)
-            })
-            return unfollowers;
+        if(document.querySelectorAll(this.element.followersBtn).length > 0){
+            const following = await this.loadFollowers(true).catch(err=>this.logger(err,this.font.error) && false);
+            const followers = (following)? await this.loadFollowers(false).catch(err=>this.logger(err,this.font.error) && false):null;
+            if(following && followers){
+                const unfollowers = following.filter(function(f){
+                    return this.indexOf(f) == -1;
+                },followers)
+                this.status.unfollowers.push(unfollowers);
+                this.logger(`You have ${unfollowers.length} people who are not following back:`,this.font.heading)
+                unfollowers.forEach((f)=>{
+                    this.logger(`${f} : <a style="${this.font.link}" href="https://www.instagram.com/${f}" target="_blank">https://www.instagram.com/${f}</a>`,this.font.small)
+                })
+                return unfollowers;
+            }
+        } else {
+            this.logger(`You are not on profile page!`,this.font.error);
         }
     }
     async loadFollowers(loadingFollowings){
@@ -602,7 +606,6 @@ class Instabot {
             const itvl = setInterval(()=>{
                 const scroll = document.querySelector(this.element.followersOverHidden);
                 const innerbox = document.querySelector(this.element.followersInnerHeight);
-                console.log(scroll,innerbox);
                 if(scroll && innerbox){
                     const loadedHeight = innerbox.scrollHeight
                     const isLoading = (document.querySelector(this.element.suggestionsTitle))
@@ -870,32 +873,13 @@ class InstabotUI {
         return btn;
     }
     async getUnfollowersBtnClicked(btn){
-        const popupname = 'UnfollowersPopup';
-        if(btn.className == 'off'){
-            const popup = document.getElementById(popupname);
-            btn.innerText = "Find Unfollowers";
-            this.closePopup(popup);
-        } else {
-            if(!btn.disabled){
-                btn.disabled=true;
-                btn.innerText = "Progressing..."
-                const unfollowers = await this.instabot.getUnfollowers();
-                const html = unfollowers
-                    ?` <ul style="margin-top:40px;">
-                        ${unfollowers.map((t)=>( 
-                            `<li style="padding:1em;">
-                                <a href="https://www.instagram.com/${t}" target="_blank">https://www.instagram.com/${t}</a>
-                            </li>`
-                        )).join('')}
-                    </ul>
-                    `
-                :`<h2 style="${this.style.heading}text-align:center;">Please try again!</h2>`
-                btn.disabled=false;
-                btn.innerText = "Close Unfollowers"
-                this.createPopup(html,popupname,this.style.smallpopup);
-            }
+        if(!btn.disabled){
+            btn.disabled=true;
+            btn.innerText = "Progressing..."
+            const unfollowers = await this.instabot.getUnfollowers();
+            btn.disabled=false;
+            btn.innerText = "Find Unfollowers"
         }
-        btn.classList.toggle('off');
     }
     statusBtn(parent){
         const btn = this.createElement({
