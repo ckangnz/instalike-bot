@@ -630,20 +630,20 @@ class Instabot {
     toggleFilter(){
         this.options.isFiltering = !this.options.isFiltering;
         this.options.isFiltering
-            ? this.logger(`Filtering turned ON`,this.font.pass)
-            : this.logger(`Filtering turned OFF`,this.font.error)
+            ? this.logger(`Filtering turned ON. Instabot will process tags`,this.font.pass)
+            : this.logger(`Filtering turned OFF. Instabot will like everything but will not comment / follow`,this.font.error)
     }
     toggleFollowing(){
         this.options.isFollowing = !this.options.isFollowing;
         this.options.isFollowing
-            ? this.logger(`Following ON`,this.font.pass)
-            : this.logger(`Following OFF`,this.font.error)
+            ? this.logger(`Following ON. Instabot is following after commenting for F4F`,this.font.pass)
+            : this.logger(`Following OFF. Instabot is not commenting for F4F / following`,this.font.error)
     }
     toggleCommenting(){
         this.options.isCommenting = !this.options.isCommenting;
         this.options.isCommenting
-            ? this.logger(`Commenting ON`,this.font.pass)
-            : this.logger(`Commenting OFF`,this.font.error)
+            ? this.logger(`Commenting ON. Instabot is commenting for L4L and F4F`,this.font.pass)
+            : this.logger(`Commenting OFF. Instabot is not commenting / following`,this.font.error)
     }
 }
 class InstabotUI {
