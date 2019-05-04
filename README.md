@@ -59,7 +59,6 @@ note: You can't click any buttons when instabot is in progress. Press `'` and wa
 
 ### Customize the option at the top :
 ##### Note 
- * Make sure to NOT have spaces between `,` for tag options
  * For random comments, wrap your comment in `""` and put `,` at the end
  * Remove `,` at the end of `emoji` if you wish to have emoji all the time.
 

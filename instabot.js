@@ -4,13 +4,13 @@ const options = {
     maxLiked    : 80,
     minLikes    : 15,
     maxLikes    : 300,
-    imageAlt : "1 person,people,closeup,selfie",
-    include : "인스타,인친,라이크,좋아요,좋아요환영,좋아요반사,라이크반사,반사,l4l,like,instalike,follow,followme,맞팔,팔로우,맞팔해요,f4f",
-    exclude:"10k,20k,30k,10kfollowers,20kfollowers,흔남,훈남,오늘의훈남,셀기꾼,육아스타그램,육아,육아그램,고딩,18,19,고1,고2,고3",
+    imageAlt : "person, people, closeup, selfie", 
+    include : "인스타, 인친, 라이크, 좋아요, 좋아요환영, 좋아요반사, 라이크반사, 반사, l4l, like, instalike, follow, followme, 맞팔, 팔로우, 맞팔해요, f4f", 
+    exclude:"10k, 20k, 30k, 10kfollowers, 20kfollowers, 흔남, 훈남, 오늘의훈남, 셀기꾼, 육아스타그램, 육아, 육아그램, 고딩, 18, 19, 고1, 고2, 고3", 
     comments : {
         conditions : {
-            followback : "선팔맞팔,선팔하면맞팔,선팔하면맞팔가요,선팔후맞팔,맞팔,소통",
-            likeback : "좋아요반사,라이크반사,좋반,맞좋아요",
+            followback : "선팔맞팔, 선팔하면맞팔, 선팔하면맞팔가요, 선팔후맞팔, 맞팔, 소통", 
+            likeback : "좋아요반사, 라이크반사, 좋반, 맞좋아요", 
         },
         comments : {
             followback: [
@@ -22,7 +22,7 @@ const options = {
                 '피드 잘보구가요','좋아요하구갑니다','안녕하세요 :) 조아요누르고가요','제꺼두 좋아요 눌러주시와요 ㅋㅋ','죠아욧!','굳굳','좋반요!','좋아요반사요!','좋반이요','좋아요 반사왔어요~~','맞좋아요하러왔어요!','좋아요먼저누르고갈게여!',
             ],
         },
-        emoji: `😊,😛,🤗,😄,🤙,👍,🙌,🙏,:),:D,;),ㅎㅎ,ㅋㅋㅋ,`,
+        emoji: "😊, 😛, 🤗, 😄, 🤙, 👍, 🙌, 🙏, :), :D, ;), ㅎㅎ, ㅋㅋㅋ, ", 
     }
 
 }
@@ -84,14 +84,14 @@ class Instabot {
             maxLiked: options.maxLiked,
             minLikes: options.minLikes,
             maxLikes : options.maxLikes,
-            imageAlt : options.imageAlt.split(','),
-            include: options.include.split(',') || [],
-            exclude: options.exclude.split(',') || [],
+            imageAlt : options.imageAlt.replace(' ','').split(','),
+            include: options.include.replace(' ','').split(',') || [],
+            exclude: options.exclude.replace(' ','').split(',') || [],
         }
         this.comments = {
             conditions : {
-                followback : options.comments.conditions.followback.split(','),
-                likeback : options.comments.conditions.likeback.split(','), 
+                followback : options.comments.conditions.followback.replace(' ','').split(','),
+                likeback : options.comments.conditions.likeback.replace(' ','').split(','), 
             },
             comments : {
                 followback: options.comments.comments.followback,
