@@ -55,7 +55,7 @@ class Instabot {
         this.conditions = {
             maxFollows: 10,
             maxLiked: 80,
-            minLikes: 20,
+            minLikes: 15,
             maxLikes : 300,
             imageAlt : [ 
                 '1 person','people','closeup','selfie',
@@ -652,7 +652,7 @@ class InstabotUI {
         this.style = {
             left : "position:fixed;bottom:10px;left:10px;padding:15px;z-index:99;",
             right: "position:fixed;bottom:10px;right:10px;padding:15px;z-index:99;",
-            logger: "position:fixed;top:50px;left:0;width:30%;overflow-y:auto;height:200px;padding:15px;color:white;background:#252525;z-index:99;border-radius:5px;resize:vertical;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
+            logger: "position:fixed;top:50px;left:0;width:25%;height:500px;overflow-y:auto;padding:15px;color:white;background:#252525;z-index:99;border-radius:5px;resize:vertical;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popup: "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;padding:10px;border-radius:15px;z-index:99;background:white;box-shadow: 0 10px 20px rgba(0,0,0,0.19),0 6px 6px rgba(0,0,0,0.23);",
             popupInner: "overflow:auto;width:100%;height:100%",
             popupClose: "position:fixed; right:2em; top:1em;border:none;border-radius:5px;color:white;background:black;",
