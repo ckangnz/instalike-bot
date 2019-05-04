@@ -195,9 +195,12 @@ class Instabot {
             this.logger(`You have already followed ${this.conditions.maxFollows} followers. Restarting will reset`,this.font.heading);
             this.stop();
         }  
+        if(!(performance.now() - this.time.start < this.time.maxDuration)){
+            this.logger(`Times up!!`,this.font.heading);
+            this.stop();
+        }
         if(
             this.status.inProgress
-            && (performance.now() - this.time.start < this.time.maxDuration)
         ){
             const nextbtn = document.querySelector(this.element.nextBtn);
             nextbtn ? nextbtn.click() : true;
