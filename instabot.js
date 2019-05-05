@@ -45,7 +45,7 @@ class Instabot {
             name : 'a.notranslate:first-child',
             personImage: 'article ._2dbep img',
             image: 'article div[role=button] .KL4Bh img.FFVAD',
-            post: "a[href*='/p/']:not(.zV_Nj)",
+            post: "a[href*='/p/']:not(.zV_Nj):not(.FH9sR):not(.c-Yi7)",
             postCloseBtn: ".ckWGn",
             recentPost : '.yQ0j1:nth-child(2) ~ div a[href*="/p/"]:not(.zV_Nj)',
             numberOfLikes : `article section div div:last-child button[type=button] span,
