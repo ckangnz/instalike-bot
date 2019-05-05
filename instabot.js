@@ -65,6 +65,7 @@ class Instabot {
             followerPopupLoadingIcon : '.W1Bne.ztp9m',
             suggestionsTitle: 'h4._7UhW9',
             commentPostBtn : '.X7cDz button',
+            commentFailAlert : '.gxNyb',
         }
         this.status ={
             liked : [],
@@ -103,13 +104,14 @@ class Instabot {
         }
         this.font ={
             heading: 'font-size:12px;font-weight:bold;',
-            super:'font-size:12px;font-weight:bold;text-align:center;background:rgba(255,223,0,0.3);',
+            super:'font-size:12px;font-weight:bold;text-align:center;background:rgba(255,215,0,0.3);',
             small : 'font-size:8px;',
             link: 'color:deepskyblue;',
             good:'font-size:10px;background:rgba(148,0,211,0.3);', //violet
             override:'font-size:8px;background:rgba(30,144,255,0.3);', //blue
             pass:'font-size:8px;background:rgba(0,256,0,0.3);', //green
             error:'font-size:8px;background:rgba(256,0,0,0.3)', //red
+            loading:'font-size:8px;background:rgba(80,80,80,0.3)', //grey
         }
     }
     delay(ms){
@@ -184,7 +186,7 @@ class Instabot {
                 .then(()=> this.getTags())
                 .then(()=> this.getImage())
                 .then(()=> this.validatePost())
-                .then((isValid)=> this.processPost(isValid))
+                .then(()=> this.processPost(),err=>this.logger(err,this.font.error))
                 .then(()=> this.delay(this.time.delayNext))
                 .then(()=> this.nextImage())
         } else {
@@ -365,7 +367,7 @@ class Instabot {
         })
     }
     validatePost(){
-        return new Promise(resolve=>{
+        return new Promise((resolve,reject)=>{
             const {
                 person,
                 src,
@@ -377,66 +379,56 @@ class Instabot {
             } = this.post;
 
             if(person == null){
-                this.logger(`Couldn't load the person`, this.font.error)
-                return resolve(false);
+                return reject(`Couldn't load the person`);
             } else {
                 this.logger(`ID: <a style="${this.font.link}" target="_blank" href="${person.personLink}">${person.personName}</a>`,this.font.heading)
                 this.logger(`Current post: <a style="${this.font.link}" target="_blank" href="${src}">${src}</a>`,this.font.small)
             }
 
             if(liked){
-                this.logger(`Already liked.`,this.font.error);
-                return resolve(false);
+                return reject("Already liked.");
             } 
             if(comment){
-                this.logger(`Already commented.`,this.font.error);
-                return resolve(false);
+                return reject("Already commented.");
             } 
             if(!this.options.isFiltering){
-                this.logger(`Filtering OFF. Skipping Validation.`, this.font.small)
-                return resolve(true);
+                return resolve("Filtering OFF. Skipping Validation.");
             }
             if (followed){
-                this.logger(`Already followed.`,this.font.error);
-                return resolve(false);
+                return reject("Already followed.");
             }
 
             if(numberOfLikes < this.conditions.minLikes){
-                this.logger(`Not enough likes`, this.font.error)
-                return resolve(false);
+                return reject("Not enough likes");
             } else if (numberOfLikes > this.conditions.maxLikes){
-                this.logger(`Too many likes`, this.font.error)
-                return resolve(false);
+                return reject("Too many likes");
             } else {
                 this.logger(`Passed like filter : ${this.conditions.minLikes} < ${numberOfLikes} < ${this.conditions.maxLikes}`,this.font.pass);
             } 
 
             if( tags.hasTag.length == 0 ){
-                this.logger(`No Matching tags.`,this.font.error);
-                return resolve(false);
+                return reject("No Matching tags.");
             } else if( tags.hasExcludes.length > 0 ){
                 const unwantedTags = tags.hasExcludes.join(',');
-                this.logger(`Found unwanted tags:${unwantedTags}`,this.font.error);
-                return resolve(false);
+                return reject(`Found unwanted tags:${unwantedTags}`);
             } else {
                 const wantedTags = tags.hasTag.join(',');
                 this.logger(`Found ${tags.hasTag.length} matching tags:${wantedTags}`,this.font.pass);
             } 
-
-            return resolve(true);
+            return resolve();
         })
     }
-    processPost(isValid){
+    processPost(){
         return new Promise(resolve=>{
-            if(isValid && this.status.inProgress){
-                this.logger(`......processing......`,this.font.small);
+            if(this.status.inProgress){
+                this.logger(`Processing....`,this.font.good);
                 (!this.options.isFiltering)
                     ? this.logger(`Filtering is OFF.`,this.font.override)
                     :null;
                 this.likePost()
                     .then(()=> this.writeComment())
                     .then(()=> this.submitComment())
-                    .then(()=> this.follow())
+                    .then(()=> this.follow(),err=>err?this.logger(err,this.font.error):null)
                     .then(()=>resolve())
             } else {
                 this.logger(`Process Skipped`,this.font.error);
@@ -446,7 +438,7 @@ class Instabot {
     }
     likePost(){
         return new Promise(resolve=>{
-            this.logger(`..liking post in ${this.time.delayLike/this.s}s..`,this.font.pass);
+            this.logger(`....liking post in ${this.time.delayLike/this.s}s..`,this.font.loading);
             this.delay(this.time.delayLike)
                 .then(()=>{
                     this.post.likeBtn.click();
@@ -458,7 +450,7 @@ class Instabot {
         })
     }
     writeComment(){
-        return new Promise(resolve=>{
+        return new Promise((resolve,reject)=>{
             const {
                 liked,
                 tags,
@@ -495,30 +487,29 @@ class Instabot {
                             tracker.setValue(lastValue);
                         }
                         input.dispatchEvent(event);
+                        return resolve();
+                    } else {
+                        return reject("Comments generating failed : No matching tags for comments");
                     }
-                    return resolve();
                 } else {
-                    this.logger(`Commenting failed`,this.font.small);
-                    return resolve();
+                    return reject("Commenting failed: Input missing");
                 }
             } else {
-                (!this.options.isFiltering)
-                    ?null
-                    :(!this.options.isCommenting)
-                    ?this.logger(`Skipping comments. Commenting Off`,this.font.override)
+                const message = (!this.options.isCommenting)
+                    ?`Skipping comments. Commenting Off`
                     :(!liked)
-                    ?this.logger(`Skipping comments. Not liked`,this.font.error)
+                    ?`Skipping comments. Not liked`
                     :(!image.isSafe)
-                    ?this.logger(`Skipping comments. Image not safe`,this.font.error)
+                    ?`Skipping comments. Image not safe`
                     :(!tags.hasF4F && !tags.hasL4L)
-                    ?this.logger(`Skipping comments. Missing required tags`,this.font.error)
+                    ?`Skipping comments. Missing required tags`
                     :null;
-                return resolve();
+                return message?reject(message):reject();
             }
         })
     }
     submitComment(){
-        return new Promise(resolve=>{
+        return new Promise((resolve, reject)=>{
             if(
                 this.options.isFiltering 
                 && this.options.isCommenting
@@ -526,27 +517,30 @@ class Instabot {
             ){
                 const btn = document.querySelector(this.element.commentPostBtn);
                 if(btn){
-                    const delay = Math.round(this.post.comment.length * 0.4);
-                    this.logger(`..posting comment in ${delay}s..`,this.font.pass)
-                    this.delay(delay * this.s)
+                    const delayComment = Math.round(this.post.comment.length * 0.4);
+                    this.logger(`....posting comment in ${delayComment}s..`,this.font.loading)
+                    this.delay(delayComment * this.s)
                         .then(()=>{
                             btn.click() 
-                            this.logger(`Successfully POSTED comment: "${this.post.comment}"`,this.font.good)
-                            return resolve() 
+                            this.logger(`....checking if comment posted ${this.time.delayNext/this.s}s...`,this.font.loading);
+                            setTimeout(()=>{
+                                const hasFailed = document.querySelector(this.element.commentFailAlert)?true:false;
+                                if(hasFailed){
+                                    this.post.comment = null;
+                                    return reject('Failed to comment!');
+                                } else {
+                                    this.logger(`Successfully POSTED comment: "${this.post.comment}"`,this.font.good)
+                                    return resolve() 
+                                }
+                            },this.time.delayNext);
                         })
                 } else {
-                    this.logger(`Comment button missing`,this.font.error);
-                    return resolve();
+                    return reject('Comment button missing');
                 }
             }else{
-                (!this.options.isFiltering)
-                    ? null 
-                    :(!this.options.isCommenting)
-                    ? null
-                    :(this.post.comment == null)
-                    ? this.logger(`Comment missing`,this.font.error)
-                    :null;
-                return resolve(false);
+                if(this.post.comment == null){
+                    return reject("Comment missing")
+                }
             }
         })
     }
@@ -568,7 +562,7 @@ class Instabot {
                 && !followed
                 && this.conditions.maxFollows >= this.status.followed.length
             ){
-                this.logger(`..Following..`,this.font.small);
+                this.logger(`....Following in ${this.time.delayFollow}....`,this.font.loading);
                 this.delay(this.time.delayFollow)
                     .then(()=>{
                         if(followbtn){
@@ -624,8 +618,8 @@ class Instabot {
     }
     async loadFollowers(loadingFollowings){
         (loadingFollowings)
-            ?this.logger(`...loading followings...`,this.font.small)
-            :this.logger(`...loading followers ...`, this.font.small)
+            ?this.logger(`...loading followings...`,this.font.loading)
+            :this.logger(`...loading followers ...`, this.font.loading)
         return new Promise(async (resolve, reject )=> {
             const flBtn = document.querySelectorAll(this.element.followersBtn);
             (loadingFollowings)
