@@ -5,9 +5,9 @@ const options = {
     maxLiked    : 80,
     minLikes    : 15,
     maxLikes    : 300,
-    imageAlt : "1 person, 2 people, people, closeup, selfie", 
+    imageAlt : "1 person, 2 people, people, closeup, selfie, 사람 1명, 사람 2명", 
     include : "인스타, 인친, 라이크, 좋아요, 좋아요환영, 좋아요반사, 라이크반사, 반사, l4l, like, instalike, follow, followme, 맞팔, 팔로우, 맞팔해요, f4f", 
-    exclude:"10k, 20k, 30k, 10kfollowers, 20kfollowers, 흔남, 훈남, 오늘의훈남, 셀기꾼, 육아스타그램, 육아, 육아그램, 고딩, 18, 19, 고1, 고2, 고3", 
+    exclude:"10k, 20k, 30k, 10kfollowers, 20kfollowers, 맞팔100, 선팔100, 흔남, 훈남, 오늘의훈남, 훈남그램, 흔남그램, 육아스타그램, 육아, 육아그램, 고딩, 18, 19, 고1, 고2, 고3", 
     comments : {
         conditions : {
             followback : "선팔맞팔, 선팔하면맞팔, 선팔하면맞팔가요, 선팔후맞팔, 맞팔, 소통, 언팔싫어요", 
@@ -562,7 +562,7 @@ class Instabot {
                 && !followed
                 && this.conditions.maxFollows >= this.status.followed.length
             ){
-                this.logger(`....Following in ${this.time.delayFollow}....`,this.font.loading);
+                this.logger(`....Following in ${this.time.delayFollow/this.s}s....`,this.font.loading);
                 this.delay(this.time.delayFollow)
                     .then(()=>{
                         if(followbtn){
