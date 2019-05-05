@@ -1,4 +1,5 @@
 const options = {
+    myid : 'ckangnz',
     maxDuration : 10, //min
     maxFollows  : 10,
     maxLiked    : 80,
@@ -27,13 +28,14 @@ const options = {
 }
 class Instabot {
     constructor(options){
+        this.myid = options.myid;
         this.s = 1000;
         this.min = 60 * this.s;
         this.hr = 60 * this.min;
         this.time = {
             start: performance.now(),
             delayInitial: 2 * this.s,
-            delayLike: 3 * this.s,
+            delayLike: 1.5 * this.s,
             delayFollow: 2 * this.s,
             delayNext: 2 * this.s,
             maxDuration: options.maxDuration * this.min,
@@ -52,6 +54,7 @@ class Instabot {
             reply: '.Igw0E:not(.MGdpg) span.EizgU',
             extraReply: 'span.glyphsSpriteCircle_add__outline__24__grey_9.u-__7',
             tags : 'article a[href*="/tags/"]',
+            mycomment: `a.notranslate[href="/${options.myid}/"]`,
             nextBtn: 'a.coreSpriteRightPaginationArrow',
             followBtn: 'button.oW_lN:not(._8A5w5)',
             followersBtn : 'a.-nal3, a._81NM2',
@@ -162,8 +165,10 @@ class Instabot {
                 ? document.querySelector(this.element.post)
                 : document.querySelector(this.element.recentPost)
                 ? document.querySelector(this.element.recentPost)
-                : document.querySelector(this.element.post) && this.logger(`Recent post missing!`,this.font.error)
-            post.click()
+                : null;
+            (post)
+                ?post.click()
+                :this.logger(`Post missing`,this.font.error)
         }
     }
     analyzePost(){
@@ -173,10 +178,11 @@ class Instabot {
                 .then(()=> this.getName())
                 .then(()=> this.getNumberOfLikes())
                 .then(()=> this.openHiddenComments())
+                .then(()=> this.checkLiked())
+                .then(()=> this.checkCommented())
+                .then(()=> this.checkFollowed())
                 .then(()=> this.getTags())
                 .then(()=> this.getImage())
-                .then(()=> this.checkLiked())
-                .then(()=> this.checkFollowed())
                 .then(()=> this.validatePost())
                 .then((isValid)=> this.processPost(isValid))
                 .then(()=> this.delay(this.time.delayNext))
@@ -344,6 +350,13 @@ class Instabot {
             return resolve();
         });
     }
+    checkCommented(){
+        return new Promise(resolve=>{
+            const comment = document.querySelector(this.element.mycomment);
+            this.post.comment = comment ? comment :null;
+            return resolve();
+        });
+    }
     checkFollowed(){
         return new Promise(resolve=>{
             this.post.followbtn = document.querySelector(this.element.followBtn);
@@ -359,6 +372,7 @@ class Instabot {
                 tags,
                 numberOfLikes,
                 liked,
+                comment,
                 followed,
             } = this.post;
 
@@ -372,6 +386,10 @@ class Instabot {
 
             if(liked){
                 this.logger(`Already liked.`,this.font.error);
+                return resolve(false);
+            } 
+            if(comment){
+                this.logger(`Already commented.`,this.font.error);
                 return resolve(false);
             } 
             if(!this.options.isFiltering){
