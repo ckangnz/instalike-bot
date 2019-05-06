@@ -495,7 +495,9 @@ class Instabot {
                     return reject("Commenting failed: Input missing");
                 }
             } else {
-                const message = (!this.options.isCommenting)
+                const message = (!this.options.isFiltering)
+                    ?null
+                    :(!this.options.isCommenting)
                     ?`Skipping comments. Commenting Off`
                     :(!liked)
                     ?`Skipping comments. Not liked`
