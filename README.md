@@ -28,14 +28,13 @@ The Instabot will NOT do these if Filtering is turned off:
 
 ---
 ### Instruction
-  1. Copy this script to your favourite IDE (sublime, notepad, vim etc.)
-  2. Customize `this.conditions` and `this.comments` to your need (I don't recommend changing delay times)
-  3. Copy the entire script
-  4. Visit www.instagram.com and search for any tags (url should say www.instagram.com/explore/tags/your-desired-tag)
-  5. Open console on chrome (You MUST enable developers mode)
-    - Windows : `Ctrl` + `Alt` + `i`
-    - Mac : `Cmd` + `option` + `i`
-  6. Under Console, paste the script then `enter`
+  1. Download the project.
+  2. Open `instabot.js`, and edit 'options' to your need.
+  3. Save the file.
+  4. Visit [chrome://extensions](chrome://extensions) and enable Developer mode (at the top right)
+  5. Click on `Load unpacked` and choose this project's folder.
+  4. Visit [ www.instagram.com ](www.instagram.com) and search for any tags (url should say www.instagram.com/explore/tags/your-desired-tag)
+  5. Click on the extension you just added.
   7. Click Start Instabot OR press `'`
   8. Press `'` to stop
 
