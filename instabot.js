@@ -104,10 +104,11 @@ class Instabot {
         }
         this.font ={
             heading: 'font-size:12px;font-weight:bold;',
-            super:'font-size:12px;font-weight:bold;text-align:center;background:rgba(255,215,0,0.3);',
+            super:'font-size:12px;font-weight:bold;text-align:center;background:black;',
             small : 'font-size:8px;',
             link: 'color:deepskyblue;',
             good:'font-size:10px;background:rgba(148,0,211,0.3);', //violet
+            progress:'font-size:10px;background:rgba(250,218,94,0.3);', //yellow
             override:'font-size:8px;background:rgba(30,144,255,0.3);', //blue
             pass:'font-size:8px;background:rgba(0,256,0,0.3);', //green
             error:'font-size:8px;background:rgba(256,0,0,0.3)', //red
@@ -222,8 +223,8 @@ class Instabot {
                 .then(()=>this.checkEndOfPost())
                 .then(()=>this.analyzePost())
         } else {
-            this.logger(`Total Like count: ${this.status.liked.length} images`,this.font.good);
-            this.logger(`Total Follow count: ${this.status.followed.length}`,this.font.good);
+            this.logger(`Total Like count: ${this.status.liked.length} images`,this.font.pass);
+            this.logger(`Total Follow count: ${this.status.followed.length}`,this.font.pass);
             this.status.followed.forEach((f)=>{
                 this.logger(`<a style="${this.font.link}" target="_blank" href="${f.person.personLink}">${f.person.personName}</a> `,this.font.small);
             })
@@ -403,7 +404,7 @@ class Instabot {
             } else if (numberOfLikes > this.conditions.maxLikes){
                 return reject("Too many likes");
             } else {
-                this.logger(`Passed like filter : ${this.conditions.minLikes} < ${numberOfLikes} < ${this.conditions.maxLikes}`,this.font.pass);
+                this.logger(`Passed like filter : ${this.conditions.minLikes} < ${numberOfLikes} < ${this.conditions.maxLikes}`,this.font.good);
             } 
 
             if( tags.hasTag.length == 0 ){
@@ -413,7 +414,7 @@ class Instabot {
                 return reject(`Found unwanted tags:${unwantedTags}`);
             } else {
                 const wantedTags = tags.hasTag.join(',');
-                this.logger(`Found ${tags.hasTag.length} matching tags:${wantedTags}`,this.font.pass);
+                this.logger(`Found ${tags.hasTag.length} matching tags:${wantedTags}`,this.font.good);
             } 
             return resolve();
         })
@@ -421,7 +422,7 @@ class Instabot {
     processPost(){
         return new Promise(resolve=>{
             if(this.status.inProgress){
-                this.logger(`Processing....`,this.font.good);
+                this.logger(`Processing....`,this.font.loading);
                 (!this.options.isFiltering)
                     ? this.logger(`Filtering is OFF.`,this.font.override)
                     :null;
@@ -438,13 +439,13 @@ class Instabot {
     }
     likePost(){
         return new Promise(resolve=>{
-            this.logger(`....liking post in ${this.time.delayLike/this.s}s..`,this.font.loading);
+            this.logger(`....liking post in ${this.time.delayLike/this.s}s..`,this.font.progress);
             this.delay(this.time.delayLike)
                 .then(()=>{
                     this.post.likeBtn.click();
                     this.post.liked = true;
                     this.status.liked.push(this.post);
-                    this.logger(`Successfully LIKED post`,this.font.good);
+                    this.logger(`Successfully LIKED post`,this.font.pass);
                     return resolve();
                 })
         })
@@ -520,18 +521,18 @@ class Instabot {
                 const btn = document.querySelector(this.element.commentPostBtn);
                 if(btn){
                     const delayComment = Math.round(this.post.comment.length * 0.4);
-                    this.logger(`....posting comment in ${delayComment}s..`,this.font.loading)
+                    this.logger(`....posting comment in ${delayComment}s..`,this.font.progress)
                     this.delay(delayComment * this.s)
                         .then(()=>{
                             btn.click() 
-                            this.logger(`....checking if comment posted ${this.time.delayNext/this.s}s...`,this.font.loading);
+                            this.logger(`....checking if comment posted ${this.time.delayNext/this.s}s...`,this.font.progress);
                             setTimeout(()=>{
                                 const hasFailed = document.querySelector(this.element.commentFailAlert)?true:false;
                                 if(hasFailed){
                                     this.post.comment = null;
                                     return reject('Failed to comment!');
                                 } else {
-                                    this.logger(`Successfully POSTED comment: "${this.post.comment}"`,this.font.good)
+                                    this.logger(`Successfully POSTED comment: "${this.post.comment}"`,this.font.pass)
                                     return resolve() 
                                 }
                             },this.time.delayNext);
@@ -564,14 +565,14 @@ class Instabot {
                 && !followed
                 && this.conditions.maxFollows >= this.status.followed.length
             ){
-                this.logger(`....Following in ${this.time.delayFollow/this.s}s....`,this.font.loading);
+                this.logger(`....Following in ${this.time.delayFollow/this.s}s....`,this.font.progress);
                 this.delay(this.time.delayFollow)
                     .then(()=>{
                         if(followbtn){
                             followbtn.click();
                             this.post.followed = true;
                             this.status.followed.push(this.post);
-                            this.logger(`FOLLOWED: <a style="${this.font.link}" style="${this.font.link}" target="_blank" href="${this.post.person.personLink}">${this.post.person.personLink}</a>`,this.font.good);
+                            this.logger(`FOLLOWED: <a style="${this.font.link}" style="${this.font.link}" target="_blank" href="${this.post.person.personLink}">${this.post.person.personLink}</a>`,this.font.pass);
                             resolve();
                         }
                         resolve();
@@ -1065,7 +1066,7 @@ class InstabotUI {
             style: self.style.btn.blue,
             parent,
         },b=>{
-            b.addEventListener('click',()=>toggleFilterBtnClicked(b));
+            b.addEventListener('click',()=>self.toggleFilterBtnClicked(b));
             return b;
         })
         return btn;
@@ -1091,7 +1092,7 @@ class InstabotUI {
             style: self.style.btn.blue,
             parent,
         },b=>{
-            b.addEventListener('click',()=>toggleFollowingBtnClicked(b))
+            b.addEventListener('click',()=>self.toggleFollowingBtnClicked(b))
             return b;
         })
         return btn;
@@ -1117,7 +1118,7 @@ class InstabotUI {
             style: self.style.btn.blue,
             parent,
         },b=>{
-            b.addEventListener('click',()=>toggleCommentingBtnClicked(b))
+            b.addEventListener('click',()=>self.toggleCommentingBtnClicked(b))
             return b;
         })
         return btn;
