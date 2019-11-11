@@ -7,7 +7,7 @@ const options = {
     maxLikes    : 300,
     imageAlt : "1 person, 2 people, people, closeup, selfie, 사람 1명, 사람 2명", 
     include : "인스타, 인친, 인친해요, 라이크, 좋아요, 좋아요환영, 좋아요반사, 라이크반사, 반사, l4l, like, instalike, follow, followme, 맞팔, 팔로우, 맞팔해요, f4f", 
-    exclude:"10k, 20k, 30k, 10kfollowers, 20kfollowers, 맞팔100, 선팔100, 훈남, 오늘의훈남, 훈남그램, 흔남그램, 육아스타그램, 육아, 육아그램, 고딩, 18, 19, 고1, 고2, 고3", 
+    exclude:"10k, 20k, 30k, 10kfollowers, 20kfollowers, 맞팔100, 선팔100, 오늘의훈남, 훈남그램, 흔남그램, 육아스타그램, 육아, 육아그램, 고딩, 18, 19, 고1, 고2, 고3", 
     comments : {
         conditions : {
             followback : "선팔맞팔, 선팔하면맞팔, 선팔하면맞팔가요, 선팔후맞팔, 맞팔, 소통, 언팔싫어요, 언팔하면언팔", 
@@ -61,7 +61,7 @@ class Instabot {
             followersOverHidden : '.isgrP',
             followersInnerHeight : 'ul.jSC57._6xe7A',
             followersList: 'a.FPmhX.notranslate._0imsa',
-            followerPopupCloseBtn:'span[aria-label="Close"]',
+            followerPopupCloseBtn:'button.wpO6b',
             followerPopupLoadingIcon : '.W1Bne.ztp9m',
             suggestionsTitle: 'h4._7UhW9',
             commentPostBtn : '.X7cDz button',
@@ -1161,4 +1161,3 @@ class InstabotUI {
 const instabot = new Instabot(options);
 const UI = new InstabotUI(instabot);
 UI.init()
-clear();
