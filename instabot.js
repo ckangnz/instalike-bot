@@ -57,11 +57,11 @@ class Instabot {
             mycomment: `a.notranslate[href="/${options.myid}/"]`,
             nextBtn: 'a.coreSpriteRightPaginationArrow',
             followBtn: 'button.oW_lN:not(._8A5w5)',
-            followersBtn : 'a.-nal3, a._81NM2',
+            followersBtn : 'a.-nal3',
             followersOverHidden : '.isgrP',
             followersInnerHeight : 'ul.jSC57._6xe7A',
             followersList: 'a.FPmhX.notranslate._0imsa',
-            followerPopupCloseBtn:'button.wpO6b',
+            followerPopupCloseBtn:'.WaOAr button.wpO6b',
             followerPopupLoadingIcon : '.W1Bne.ztp9m',
             suggestionsTitle: 'h4._7UhW9',
             commentPostBtn : '.X7cDz button',
@@ -602,6 +602,7 @@ class Instabot {
     async getUnfollowers(){
         this.logger(`Finding unfollowers.. Please wait..`,this.font.super)
         if(document.querySelectorAll(this.element.followersBtn).length > 0){
+		debugger;
             const following = await this.loadFollowers(true).catch(err=>this.logger(err,this.font.error) && false);
             const followers = (following)? await this.loadFollowers(false).catch(err=>this.logger(err,this.font.error) && false):null;
             if(following && followers){
